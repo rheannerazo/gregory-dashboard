@@ -4,4 +4,3 @@
 *.py~
 __pycache__/
 .DS_Store
-!state/*.json

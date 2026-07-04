@@ -1,7 +1,0 @@
-{"ts": "2026-07-05T09:00:00Z", "agent": "planner", "task_id": "T-001", "type": "needs_human", "message": "Venue confirmed but Greg must pick the exact early-August date before we can update the registration page."}
-{"ts": "2026-07-05T09:15:00Z", "agent": "builder", "task_id": "T-002", "type": "assigned", "message": "Picked up the UN Sept 21-22 eSpeakers calendar entry."}
-{"ts": "2026-07-05T10:00:00Z", "agent": "builder", "task_id": "T-003", "type": "progress", "message": "Drafted 2 of 3 newsletter articles from the unpublished website backlog; voice pass still needed on the third."}
-{"ts": "2026-07-05T10:30:00Z", "agent": "scribe", "task_id": "T-004", "type": "review_requested", "message": "Follow-up sent to Doug Means; requesting planner review before closing out."}
-{"ts": "2026-07-05T11:00:00Z", "agent": "scout", "task_id": "T-005", "type": "done", "message": "Tracker rows refreshed and Friday report drafted for Greg's review."}
-{"ts": "2026-07-05T11:20:00Z", "agent": "scribe", "task_id": "T-006", "type": "progress", "message": "Static build script for the mission control page is working locally; wiring up Pages publish next."}
-{"ts": "2026-07-05T11:45:00Z", "agent": "scribe", "task_id": "T-008", "type": "blocked", "message": "PodMatch session keeps flashing to /login before cookie auth resolves; holding until next active window."}
