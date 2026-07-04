@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>The Startup Architect &mdash; Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1730;
+  --blue:#1A8CF0;
+  --bg:#f5f7fa;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:'Montserrat',system-ui,sans-serif;}
+
+header{background:var(--navy);color:#fff;padding:36px 24px 30px;}
+.header-inner{max-width:1100px;margin:0 auto;}
+header .eyebrow{color:var(--blue);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+header h1{font-family:'Anton',Montserrat,sans-serif;font-weight:400;margin:0 0 8px;font-size:clamp(28px,5vw,42px);letter-spacing:.5px;}
+header .subtitle{color:#cdd7e8;font-size:15px;margin:0 0 18px;max-width:640px;line-height:1.5;}
+header .asof{color:#9fb0cc;font-size:12px;margin-bottom:14px;}
+.overall-wrap{max-width:420px;}
+.overall-label{display:flex;justify-content:space-between;font-size:12px;color:#cdd7e8;margin-bottom:6px;}
+.overall-bar{background:rgba(255,255,255,.15);border-radius:20px;height:12px;overflow:hidden;}
+.overall-bar>div{background:var(--blue);height:100%;border-radius:20px;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+
+h2{color:var(--navy);font-size:22px;font-weight:800;margin:44px 0 6px;padding-bottom:10px;border-bottom:3px solid var(--blue);}
+h2:first-of-type{margin-top:0;}
+.section-sub{color:var(--muted);font-size:13px;margin:0 0 18px;}
+
+.card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+.muted{color:var(--muted);font-size:.92em;}
+
+/* Needs you */
+.needgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+.needcard{background:#fff;border-left:4px solid var(--blue);border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+.ny-title{font-weight:700;color:var(--navy);font-size:14.5px;margin-bottom:6px;}
+.ny-line{font-size:13.5px;color:#374151;line-height:1.5;}
+.ny-note{font-size:12.5px;color:var(--muted);margin-top:6px;font-style:italic;}
+.ny-due{font-size:12px;color:var(--blue);font-weight:600;margin-top:8px;}
+
+/* In progress */
+.proggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+.progitem{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);border-top:3px solid var(--blue);}
+.pi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.pi-title{font-weight:700;color:var(--navy);font-size:14px;}
+.pi-desc{font-size:13px;color:#374151;line-height:1.45;}
+.pi-meta{margin-top:8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* Done */
+.donegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+.donegroup{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+.donegroup h4{margin:0 0 8px;color:var(--navy);font-size:13.5px;}
+.donelist{list-style:none;margin:0;padding:0;}
+.donelist li{font-size:13px;color:#374151;padding:5px 0 5px 22px;position:relative;border-top:1px solid #eef1f5;}
+.donelist li:first-child{border-top:none;}
+.donelist li::before{content:"\2713";position:absolute;left:0;color:#16a34a;font-weight:700;}
+
+/* Where things stand */
+.wsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.wscard{background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+.ws-name{font-weight:700;color:var(--navy);font-size:13px;margin-bottom:8px;}
+.ws-state{font-weight:800;font-size:15px;margin-bottom:4px;}
+.ws-count{font-size:12px;}
+
+/* Scoreboard */
+.scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+.score{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(10,23,48,.06);border-top:4px solid var(--navy);}
+.score-label{font-size:13px;color:var(--navy);font-weight:700;}
+.score-num{font-size:26px;font-weight:800;color:var(--blue);margin:8px 0;}
+.progress{background:#e5e7eb;border-radius:20px;height:10px;overflow:hidden;}
+.progress>div{background:var(--blue);height:100%;}
+
+/* Key dates */
+.datelist{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(10,23,48,.06);overflow:hidden;}
+.daterow{display:flex;gap:16px;align-items:baseline;padding:12px 18px;border-top:1px solid #eef1f5;}
+.daterow:first-child{border-top:none;}
+.date-day{flex-shrink:0;width:70px;font-weight:800;color:var(--blue);font-size:13px;}
+.date-task{font-size:13.5px;color:#374151;}
+.daterow.curated{background:#f7fafe;}
+
+/* Maps */
+.maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
+.mapcard{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+.mapcard h3{margin:0 0 10px;color:var(--navy);font-size:15px;}
+.mapcard img{width:100%;border-radius:8px;border:1px solid #eef1f5;display:block;margin-bottom:10px;}
+.mapcard p{margin:0;line-height:1.5;}
+
+.foot{margin-top:56px;color:#9ca3af;font-size:12px;text-align:center;}
+
+@media (max-width:640px){
+  .wrap{padding:24px 16px 60px;}
+  header{padding:28px 16px 24px;}
+  h2{font-size:19px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">The Startup Architect</div>
+    <h1>Status Dashboard</h1>
+    <p class="subtitle">A plain-language snapshot of where the launch stands: what's done, what's moving, and the couple of things only you can unblock.</p>
+    <div class="asof">As of Saturday, July 04, 2026</div>
+    <div class="overall-wrap">
+      <div class="overall-label"><span>Overall progress</span><span>7/44 tasks done</span></div>
+      <div class="overall-bar"><div style="width:16%"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 id="needs-you">Needs You, Greg</h2>
+  <p class="section-sub">The couple of things only you can move forward. Everything else is being handled.</p>
+  <div class="needgrid"><div class="needcard"><div class="ny-title">Greg unblocks access</div><div class="ny-line"></div><div class="ny-due">Due Wednesday, Jun 24</div></div><div class="needcard"><div class="ny-title">Get Greg&#x27;s travel calendar</div><div class="ny-line">Greg will send his travel calendar; use it to schedule events and asks around his availability (meeting note).</div><div class="ny-due">Due Thursday, Jun 25</div></div><div class="needcard"><div class="ny-title">Lock lecture date + format</div><div class="ny-line">Confirm the online $10 Overview Lecture date &amp; format</div><div class="ny-note">Working assumption: Sat Aug 1, online, 10 dollar ticket, 60 min + Q&amp;A. Building on this now. Greg can flag tomorrow if he wants a change.</div><div class="ny-due">Due Wednesday, Jun 24</div></div><div class="needcard"><div class="ny-title">Outline lecture slides with Greg</div><div class="ny-line">High-level deck for the Overview Lecture</div><div class="ny-due">Due Friday, Jul 3</div></div><div class="needcard"><div class="ny-title">DELIVER the Overview Lecture</div><div class="ny-line">The online $10 lecture (milestone)</div><div class="ny-due">Due Saturday, Aug 1</div></div><div class="needcard"><div class="ny-title">RUN the 2-Day Intensive</div><div class="ny-line">The paid 2-day event (milestone)</div><div class="ny-due">Due Sunday, Aug 16</div></div><div class="needcard"><div class="ny-title">Build the lecture slide deck</div><div class="ny-line">Align title/theme/length first, then build the deck skeleton (Rheanne) for Greg to flush out, with facilitator notes. Big decks, light per slide. ~45 min talk inside the 2-hr event (Jun 23 call).</div><div class="ny-due">Due Saturday, Jul 11</div></div><div class="needcard"><div class="ny-title">Stand up WhatsApp Community (office hours)</div><div class="ny-line">Optional channel: a WhatsApp Community as &#x27;office hours&#x27; where the audience can chat with Greg. Stand up if going that route (Jun 23 call).</div><div class="ny-due">Due Saturday, Jul 18</div></div></div>
+
+  <h2 id="in-progress">In Progress</h2>
+  <p class="section-sub">Actively being worked on right now.</p>
+  <div class="proggrid"><div class="progitem"><div class="pi-head"><span class="pi-title">Build website registration page</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc">The landing page all traffic points to</div><div class="pi-meta muted">Website</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Cross-platform positioning rollout</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc">Set brand on Substack, X, IG, FB, YT, TikTok, LI company/newsletter</div><div class="pi-meta muted">Brand</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Daily content engine</span><span class="badge" style="background:#0d9488">Ongoing</span></div><div class="pi-desc">Recurring: LinkedIn post/engage/outreach + repurpose 1 piece</div><div class="pi-meta muted">Content</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Optimize the E-speakers profile</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc"></div><div class="pi-meta muted">Growth</div></div></div>
+
+  <h2 id="where-things-stand">Where Things Stand</h2>
+  <p class="section-sub">A one-word status for each area of the launch.</p>
+  <div class="wsgrid"><div class="wscard"><div class="ws-name">Brand</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">1/3 done</div></div><div class="wscard"><div class="ws-name">Commerce</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/2 done</div></div><div class="wscard"><div class="ws-name">Community</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Content</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">0/8 done</div></div><div class="wscard"><div class="ws-name">Event</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Event ops</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Growth</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Launch</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/5 done</div></div><div class="wscard"><div class="ws-name">Ops</div><div class="ws-state" style="color:#d97706">Waiting on you</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Performance tracking</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Program</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/5 done</div></div><div class="wscard"><div class="ws-name">Promo</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Security</div><div class="ws-state" style="color:#16a34a">Done</div><div class="ws-count muted">1/1 done</div></div><div class="wscard"><div class="ws-name">Setup</div><div class="ws-state" style="color:#d97706">Waiting on you</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Sponsors</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Systems</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Website</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">0/1 done</div></div></div>
+
+  <h2 id="scoreboard">Scoreboard</h2>
+  <p class="section-sub">Event funnel numbers so far, next to the goal.</p>
+  <div class="scoregrid"><div class="score"><div class="score-label">Lecture registrations</div><div class="score-num">0 <span class="muted">/ 45</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Lecture attendance</div><div class="score-num">0 <span class="muted">/ 30</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">2-Day seats sold</div><div class="score-num">0 <span class="muted">/ 10</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Sponsors closed ($1k)</div><div class="score-num">0 <span class="muted">/ 3</span></div><div class="progress"><div style="width:0%"></div></div></div></div>
+
+  <h2 id="key-dates">Key Dates</h2>
+  <p class="section-sub">What's coming up.</p>
+  <div class="datelist"><div class="daterow"><div class="date-day">Jul 04</div><div class="date-task">Stand up Greg&#x27;s own email newsletter</div></div><div class="daterow"><div class="date-day">Jul 04</div><div class="date-task">Backfill Substack from past LinkedIn newsletters</div></div><div class="daterow"><div class="date-day">Jul 05</div><div class="date-task">Cross-platform positioning rollout</div></div><div class="daterow"><div class="date-day">Jul 11</div><div class="date-task">Map workshop session pathways (XLS)</div></div><div class="daterow"><div class="date-day">Jul 11</div><div class="date-task">Stand up the workshop attendee platform</div></div><div class="daterow"><div class="date-day">Jul 11</div><div class="date-task">Optimize the E-speakers profile</div></div><div class="daterow"><div class="date-day">Jul 11</div><div class="date-task">Bite-sized value content from lectures</div></div><div class="daterow"><div class="date-day">Jul 11</div><div class="date-task">Build the lecture slide deck</div></div><div class="daterow curated"><div class="date-day">TBD</div><div class="date-task"><b>Know Your Phase masterclass</b> &middot; The Bornemann Theatre, San Marcos &middot; early August 2026 (date TBD)</div></div></div>
+
+  <h2 id="done">Done</h2>
+  <p class="section-sub">Wins so far, grouped by area.</p>
+  <div class="donegrid"><div class="donegroup"><h4>Brand <span class="muted">(1)</span></h4><ul class="donelist"><li>Put Greg&#x27;s brand kit in the Drive</li></ul></div><div class="donegroup"><h4>Launch <span class="muted">(1)</span></h4><ul class="donelist"><li>Confirm ticket pricing</li></ul></div><div class="donegroup"><h4>Ops <span class="muted">(1)</span></h4><ul class="donelist"><li>Set up recurring meetings (Mon + Fri)</li></ul></div><div class="donegroup"><h4>Program <span class="muted">(1)</span></h4><ul class="donelist"><li>Review the Master Manual</li></ul></div><div class="donegroup"><h4>Systems <span class="muted">(1)</span></h4><ul class="donelist"><li>Stand up the master calendar</li></ul></div></div>
+
+  <h2 id="maps">Maps &amp; Big Picture</h2>
+  <p class="section-sub">The visual plan.</p>
+  <div class="maps"><div class="mapcard"><h3>Your Role with Greg</h3><img src="assets/maps/image1.png" alt="Your Role with Greg" loading="lazy"><p class="muted">One role, several components: LinkedIn, the content engine, the website, the funnel and sponsors are all part of this one Chief of Staff role.</p></div><div class="mapcard"><h3>The 8-Week Plan</h3><img src="assets/maps/image2.png" alt="The 8-Week Plan" loading="lazy"><p class="muted">Phase 1 by workstream across 8 weeks, building toward the Week 6 lecture and the Week 7 intensive.</p></div><div class="mapcard"><h3>Week 1, Day by Day</h3><img src="assets/maps/image3.png" alt="Week 1, Day by Day" loading="lazy"><p class="muted">The daily content engine plus each day&#x27;s build focus, Monday to Friday.</p></div><div class="mapcard"><h3>The Content Engine</h3><img src="assets/maps/image4.png" alt="The Content Engine" loading="lazy"><p class="muted">Create once, publish everywhere: one source piece repurposed to every owned audience and social channel.</p></div><div class="mapcard"><h3>Event Run-of-Show</h3><img src="assets/maps/image5.png" alt="Event Run-of-Show" loading="lazy"><p class="muted">The single live-event flow: 30 min networking + merch, 45 min talk, 5 min break, 30 min book signing.</p></div></div>
+
+  <div class="foot">The Startup Architect &middot; status snapshot, updated periodically</div>
+</div>
+</body></html>
