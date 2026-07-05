@@ -43,7 +43,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 XLSX = os.path.join(HERE, "Startup_Architect_Master_Tracker.xlsx")
 STATE = os.path.join(HERE, "tracker_state.json")
 ASSETS = os.path.join(HERE, "assets")
-CALENDAR_JSON = os.path.join(HERE, "mission-control", "state", "calendar.json")
+MC_STATE_DIR = os.path.join(HERE, "mission-control", "state")
+CALENDAR_JSON = os.path.join(MC_STATE_DIR, "calendar.json")
+MC_TASKS_JSON = os.path.join(MC_STATE_DIR, "tasks.json")
+MC_OUTBOX_JSON = os.path.join(MC_STATE_DIR, "outbox.json")
+MC_SCOREBOARD_JSON = os.path.join(MC_STATE_DIR, "scoreboard.json")
+MC_DELIVERABLES_JSON = os.path.join(MC_STATE_DIR, "deliverables.json")
 
 OUT_ROOT = os.path.join(HERE, "gregory-dashboard", "docs")
 OUT_ASSETS_MAPS = os.path.join(OUT_ROOT, "assets", "maps")
@@ -83,6 +88,46 @@ BLOCKLIST = [
     "password", "lastpass", "delphi", "login", "credential",
     "rotate", "api key", "handover",
 ]
+
+# Department workstreams Gregory is allowed to see. Anything else (Ascend,
+# Infrastructure, or any future internal-only workstream) is excluded
+# entirely from mission-control-sourced content -- never rendered, never
+# counted, never named.
+GREG_WORKSTREAMS = {
+    "events", "speaking", "outreach", "newsletter", "content", "website", "meetings",
+}
+
+# Internal agent names -- must never appear on this page. Attribute
+# mission-control-sourced work to "the team" instead.
+AGENT_NAMES = {
+    "atlas", "forge", "vet", "scout", "scribe", "warden", "concierge", "jesamie",
+    "planner", "builder", "checker",
+}
+
+
+def mc_workstream_allowed(ws):
+    """True only for the Gregory-relevant department workstreams. This is the
+    hard privacy-wall gate for every mission-control task/outbox/calendar item
+    before it is ever rendered."""
+    return (ws or "").strip().lower() in GREG_WORKSTREAMS
+
+
+_AGENT_NAME_RE = re.compile(
+    r"\b(" + "|".join(re.escape(n) for n in AGENT_NAMES) + r")\b", re.IGNORECASE)
+
+
+def scrub_agent_names(text):
+    """Replace any internal agent name with 'the team' and tidy up double
+    spaces/articles left behind (e.g. 'with Jesamie' -> 'with the team').
+    Applied to every mission-control-sourced string before render -- Jesamie
+    is a real (human) name but is treated the same as the AI agent names for
+    this page: department-level only, no individual attribution."""
+    if not text:
+        return ""
+    t = _AGENT_NAME_RE.sub("the team", text)
+    t = re.sub(r"\bthe team's\b", "the team's", t, flags=re.IGNORECASE)
+    t = re.sub(r"\s{2,}", " ", t).strip()
+    return t
 
 
 def safe(text):
@@ -228,6 +273,114 @@ def merged_tasks():
     return tasks, daily, s
 
 
+# ---------------- mission-control state (department live data) ----------------
+# All loaders below are read-only and tolerate a missing/unreadable/malformed
+# file by returning an empty result -- the page must degrade gracefully to
+# current (tracker-only) behavior if mission-control/state/ isn't there.
+
+def _load_json(path):
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError, ValueError):
+        return None
+
+
+def load_mc_tasks():
+    """Mission-control tasks, filtered to Gregory-relevant workstreams only.
+
+    Applies the full privacy wall: excludes Ascend/Infrastructure/any
+    non-allowlisted workstream, excludes task_is_sensitive() hits, and
+    sanitizes every rendered string with the same safe()/clean_client_text()
+    used for tracker tasks. Never attributes anything to an agent name.
+    """
+    data = _load_json(MC_TASKS_JSON)
+    if not data:
+        return []
+    raw_tasks = data.get("tasks") or []
+    out = []
+    for t in raw_tasks:
+        ws_raw = t.get("workstream", "")
+        if not mc_workstream_allowed(ws_raw):
+            continue
+        # Reuse the existing sensitive-task gate (checks Task/Workstream keys).
+        if task_is_sensitive({"Task": t.get("title", ""), "Workstream": ws_raw}):
+            continue
+        title = scrub_agent_names(clean_client_text(safe(clean(t.get("title", "")))))
+        if not title:
+            continue
+        desc = scrub_agent_names(clean_client_text(safe(clean(t.get("description", "")))))
+        status = (t.get("status") or "").strip().lower()
+        out.append({
+            "id": clean(t.get("id", "")),
+            "title": title,
+            "description": desc,
+            "workstream": display_workstream(ws_raw),
+            "status": status,
+            "updated": clean(t.get("updated", "")),
+        })
+    return out
+
+
+def load_mc_outbox():
+    """Mission-control outbox emails, sanitized: subjects only, never
+    recipient addresses, never raw feed lines."""
+    data = _load_json(MC_OUTBOX_JSON)
+    if not data:
+        return []
+    raw = data.get("emails") or []
+    out = []
+    for e in raw:
+        subject = scrub_agent_names(clean_client_text(safe(clean(e.get("subject", "")))))
+        if not subject:
+            continue
+        out.append({
+            "id": clean(e.get("id", "")),
+            "subject": subject,
+            "status": (e.get("status") or "").strip().lower(),
+            "updated": clean(e.get("updated", "") or e.get("created", "")),
+        })
+    return out
+
+
+def load_mc_scoreboard():
+    """Mission-control scoreboard metrics. Returns [] if the file is missing
+    or empty so callers can fall back to the old hardcoded scoreboard."""
+    data = _load_json(MC_SCOREBOARD_JSON)
+    if not data:
+        return []
+    metrics = data.get("metrics") or {}
+    out = []
+    for key, m in metrics.items():
+        label = clean_client_text(safe(clean(m.get("label", ""))))
+        if not label:
+            continue
+        try:
+            value = float(m.get("value", 0) or 0)
+        except (TypeError, ValueError):
+            value = 0
+        try:
+            target = float(m.get("target", 0) or 0)
+        except (TypeError, ValueError):
+            target = 0
+        out.append({"key": key, "label": label, "value": value, "target": target})
+    return out
+
+
+def _parse_dt(s):
+    """Best-effort ISO8601 -> naive UTC-ish datetime.date, tolerant of a
+    trailing Z/offset. Returns None on anything unparsable."""
+    if not s:
+        return None
+    try:
+        s2 = s.replace("Z", "+00:00")
+        return datetime.datetime.fromisoformat(s2)
+    except ValueError:
+        return None
+
+
 # ---------------- helpers ----------------
 def esc(x):
     return html_lib.escape(str(x) if x is not None else "")
@@ -305,6 +458,18 @@ BOARD_COLUMNS = [
 
 COLUMN_CAP = 8
 
+# mission-control status -> board bucket. "backlog" has no bucket here (not
+# yet in progress, not waiting on Greg, not done) so it simply doesn't appear
+# on this department-facing board.
+MC_STATUS_BUCKET = {
+    "in_progress": "in_progress",
+    "assigned": "in_progress",
+    "review": "in_progress",
+    "blocked": "in_progress",
+    "ongoing": "in_progress",
+    "done": "done",
+}
+
 
 def _task_note_line(t):
     """A clean, client-safe one-line note if there's something worth showing."""
@@ -315,10 +480,61 @@ def _task_note_line(t):
     return desc
 
 
-def build_board_card(t):
-    title = esc(clean_client_text(safe(clean(t.get("Task", "")))))
-    ws = esc(display_workstream(t.get("Workstream", "Other") or "Other"))
+def _mentions_greg_or_lisa(text):
+    low = (text or "").lower()
+    return "greg" in low or "gregory" in low or "lisa" in low
+
+
+def _normalize_tracker_card(t):
+    """Tracker (xlsx + tracker_state.json) task -> a common card shape."""
+    title = clean_client_text(safe(clean(t.get("Task", ""))))
+    if not title:
+        return None
+    ws = display_workstream(t.get("Workstream", "Other") or "Other")
     note = _task_note_line(t)
+    status = (t.get("Status") or "").lower()
+    if status == "waiting on greg":
+        bucket = "waiting"
+    elif status in ("in progress", "ongoing", "blocked"):
+        bucket = "in_progress"
+    elif status == "done":
+        bucket = "done"
+    else:
+        return None
+    return {
+        "title": title, "workstream": ws, "note": note, "bucket": bucket,
+        "updated": t.get("Updated", "") or t.get("Due", ""),
+    }
+
+
+def _normalize_mc_card(t):
+    """Mission-control task (already workstream-filtered + sanitized by
+    load_mc_tasks) -> a common card shape. needs_human only lands in the
+    'waiting' bucket if the ask genuinely names Greg/Lisa -- otherwise it's
+    department-internal follow-up, not something to put in front of him."""
+    status = t.get("status", "")
+    if status == "needs_human":
+        haystack = f"{t.get('title', '')} {t.get('description', '')}"
+        if not _mentions_greg_or_lisa(haystack):
+            return None
+        bucket = "waiting"
+    else:
+        bucket = MC_STATUS_BUCKET.get(status)
+        if not bucket:
+            return None
+    return {
+        "title": t.get("title", ""),
+        "workstream": t.get("workstream", "Other"),
+        "note": t.get("description", ""),
+        "bucket": bucket,
+        "updated": t.get("updated", ""),
+    }
+
+
+def build_board_card(card):
+    title = esc(card["title"])
+    ws = esc(card["workstream"])
+    note = card.get("note", "")
     note_html = f'<div class="task-desc">{esc(note)}</div>' if note else ""
     return f"""
 <div class="taskcard">
@@ -329,17 +545,27 @@ def build_board_card(t):
 """
 
 
-def build_board(tasks):
+def build_board(tasks, mc_tasks=None):
+    """Merge tracker tasks + sanitized mission-control tasks into one board.
+    mc_tasks must already be workstream-filtered/sanitized via load_mc_tasks()."""
     visible = [t for t in tasks if not task_is_sensitive(t)]
+    cards = [c for c in (_normalize_tracker_card(t) for t in visible) if c]
+    for t in (mc_tasks or []):
+        c = _normalize_mc_card(t)
+        if c:
+            cards.append(c)
 
     counts = {}
     columns_html = ""
-    for key, label, color, statuses in BOARD_COLUMNS:
-        col_tasks = [t for t in visible if (t.get("Status") or "").lower() in statuses]
-        total_n = len(col_tasks)
+    for key, label, color, _statuses in BOARD_COLUMNS:
+        col_cards = [c for c in cards if c["bucket"] == key]
+        if key == "done":
+            # Most recent 8, newest first.
+            col_cards.sort(key=lambda c: c.get("updated", ""), reverse=True)
+        total_n = len(col_cards)
         counts[key] = total_n
-        shown = col_tasks[:COLUMN_CAP]
-        cards = "".join(build_board_card(t) for t in shown) or '<p class="col-empty">Nothing here right now.</p>'
+        shown = col_cards[:COLUMN_CAP]
+        cards_html = "".join(build_board_card(c) for c in shown) or '<p class="col-empty">Nothing here right now.</p>'
         more_html = ""
         remaining = total_n - len(shown)
         if remaining > 0:
@@ -351,7 +577,7 @@ def build_board(tasks):
         <span class="col-name">{esc(label).upper()}</span>
         <span class="col-count">{total_n}</span>
       </div>
-      <div class="col-body">{cards}{more_html}</div>
+      <div class="col-body">{cards_html}{more_html}</div>
     </div>
 """
     return f'<div class="board">{columns_html}</div>', counts
@@ -456,6 +682,116 @@ def build_sidebar_key_dates(today=None):
 """
 
 
+# ---------------- THIS WEEK (department activity summary) ----------------
+def _this_week_calendar_events():
+    """Calendar events fit to show in a Greg-facing weekly summary: public
+    events, plus non-public events on the Meetings workstream (meeting titles
+    are fine per the privacy rules -- only Ascend/Infrastructure and sensitive
+    items are excluded)."""
+    data = _load_json(CALENDAR_JSON)
+    if not data:
+        return []
+    raw = data.get("events") or []
+    out = []
+    for e in raw:
+        ws = e.get("workstream", "")
+        is_public = bool(e.get("public"))
+        is_meeting = (ws or "").strip().lower() == "meetings"
+        if not (is_public or is_meeting):
+            continue
+        if ws and not mc_workstream_allowed(ws) and not is_public:
+            # Non-public + not an allowed workstream -> skip.
+            continue
+        title = scrub_agent_names(clean_client_text(safe(clean(e.get("title", "")))))
+        if not title:
+            continue
+        out.append(e | {"_title": title})
+    return out
+
+
+def build_this_week(mc_tasks, today=None):
+    """Compact 'Your team this week' summary, last 7 days, derived only from
+    structured state (tasks.json / outbox.json / calendar.json) -- never from
+    feed.jsonl. Returns '' if there's nothing to show (e.g. mission-control
+    state is entirely missing) so the section simply doesn't render."""
+    today = today or datetime.date(2026, 7, 6)
+    window_start = today - datetime.timedelta(days=7)
+
+    def in_window(dt_str):
+        dt = _parse_dt(dt_str)
+        if not dt:
+            return False
+        d = dt.date() if hasattr(dt, "date") else dt
+        return window_start <= d <= today
+
+    # 1. Tasks completed this week (mission-control, already workstream-filtered).
+    completed = [t for t in mc_tasks if t.get("status") == "done" and in_window(t.get("updated"))]
+    completed.sort(key=lambda t: t.get("updated", ""), reverse=True)
+    completed_titles = [t["title"] for t in completed[:5]]
+
+    # 2. Outbox emails sent this week (subjects only).
+    outbox = load_mc_outbox()
+    sent = [e for e in outbox if e.get("status") == "sent" and in_window(e.get("updated"))]
+
+    # 3. Meetings/events booked this week: calendar entries whose *creation*
+    # falls in the window. calendar.json doesn't track a separate "added" ts,
+    # so we use the event's own date as a proxy for recency isn't right --
+    # instead we treat entries dated within the trailing week as newly on the
+    # calendar. This intentionally undercounts rather than guesses.
+    events = _this_week_calendar_events()
+    booked = [e for e in events if in_window(e.get("date", ""))]
+
+    # 4. Next upcoming date across the same event set.
+    upcoming_dates = []
+    for e in events:
+        d = clean(e.get("date", ""))
+        try:
+            dd = datetime.date.fromisoformat(d)
+        except ValueError:
+            continue
+        if dd >= today:
+            upcoming_dates.append((dd, e["_title"]))
+    upcoming_dates.sort(key=lambda x: x[0])
+    next_up = upcoming_dates[0] if upcoming_dates else None
+
+    if not (completed or sent or booked or next_up):
+        return ""
+
+    completed_html = ""
+    if completed_titles:
+        items = "".join(f'<li>{esc(t)}</li>' for t in completed_titles)
+        completed_html = f'<ul class="tw-list">{items}</ul>'
+
+    next_html = ""
+    if next_up:
+        next_html = f'<div class="tw-next"><span class="tw-next-label">Next up:</span> {esc(next_up[1])} &mdash; {esc(next_up[0].strftime("%b %d"))}</div>'
+
+    return f"""
+<section class="tw-section">
+  <div class="tw-head">
+    <span class="tw-flag">YOUR TEAM THIS WEEK</span>
+    <span class="tw-sub muted">The last 7 days, from your Chief of Staff department.</span>
+  </div>
+  <div class="tw-grid">
+    <div class="tw-card">
+      <div class="tw-num">{len(completed)}</div>
+      <div class="tw-label">Tasks completed</div>
+      {completed_html}
+    </div>
+    <div class="tw-card">
+      <div class="tw-num">{len(sent)}</div>
+      <div class="tw-label">Replies &amp; emails sent</div>
+    </div>
+    <div class="tw-card">
+      <div class="tw-num">{len(booked)}</div>
+      <div class="tw-label">Meetings booked</div>
+    </div>
+  </div>
+  {next_html}
+</section>
+"""
+
+
 def build_calendar(today=None):
     today = today or datetime.date.today()
     upcoming = upcoming_calendar_events(today)
@@ -538,7 +874,27 @@ def build_calendar(today=None):
 
 
 def build_scoreboard(s):
+    """Prefer mission-control/state/scoreboard.json (department-maintained
+    metrics); fall back to the old hardcoded funnel scoreboard if that file
+    is missing, empty, or unreadable."""
+    mc_metrics = load_mc_scoreboard()
+
     out = ""
+    if mc_metrics:
+        for m in mc_metrics:
+            target = m["target"]
+            pct = min(100, (m["value"] / target * 100)) if target else 0
+            actual = m["value"]
+            actual_disp = int(actual) if actual == int(actual) else actual
+            target_disp = int(target) if target == int(target) else target
+            out += (
+                f'<div class="score">'
+                f'<div class="score-label">{esc(m["label"])}</div>'
+                f'<div class="score-num">{esc(actual_disp)} <span class="muted">/ {target_disp}</span></div>'
+                f'<div class="progress"><div style="width:{pct:.0f}%"></div></div>'
+                f'</div>')
+        return out
+
     for m in SCOREBOARD:
         actual = s["funnel"].get(m["key"], 0) or 0
         try:
@@ -694,6 +1050,19 @@ html.js-ready [data-view].view-active{{display:block;}}
 h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}}
 .section-sub{{color:var(--muted);font-size:12.5px;margin:0 0 16px;}}
 
+/* This week */
+.tw-section{{background:#f7f6f3;border:1px solid var(--border);border-radius:12px;padding:16px 18px 18px;margin-bottom:20px;}}
+.tw-head{{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}}
+.tw-flag{{font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--navy);}}
+.tw-sub{{font-size:12px;}}
+.tw-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}}
+.tw-card{{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}}
+.tw-num{{font-size:24px;font-weight:800;color:var(--blue);line-height:1.1;}}
+.tw-label{{font-size:12px;color:var(--navy);font-weight:700;margin-top:4px;}}
+.tw-list{{margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#5b606b;line-height:1.5;}}
+.tw-next{{margin-top:12px;font-size:12.5px;color:#3a3f4a;}}
+.tw-next-label{{font-weight:700;color:var(--navy);}}
+
 /* Needs you */
 .needs-section{{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:20px;}}
 .needs-head{{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}}
@@ -836,6 +1205,7 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
   <section class="center layout-center" id="overview" data-view="overview">
     <h2 class="view-title">Overview</h2>
     <p class="section-sub">Every workstream your Chief of Staff department is running, at a glance.</p>
+    {THIS_WEEK}
     {NEEDS_YOU}
     {BOARD}
   </section>
@@ -900,10 +1270,14 @@ def render():
     done_n = sum(1 for t in tasks if (t.get("Status") or "").lower() == "done")
     pct = (done_n / total * 100) if total else 0
 
-    workstream_count = len({display_workstream(t.get("Workstream", "Other") or "Other") for t in tasks})
+    mc_tasks = load_mc_tasks()
+
+    workstream_count = len({display_workstream(t.get("Workstream", "Other") or "Other") for t in tasks}
+                            | {t["workstream"] for t in mc_tasks})
 
     needs_you_html = build_needs_you(tasks)
-    board_html, board_counts = build_board(tasks)
+    this_week_html = build_this_week(mc_tasks)
+    board_html, board_counts = build_board(tasks, mc_tasks)
     calendar_html = build_calendar()
     scoreboard_html = build_scoreboard(s)
     maps_html = build_maps()
@@ -930,6 +1304,7 @@ def render():
         WORKSTREAMS=workstream_count,
         SIDEBAR=sidebar_html,
         NAV_MOBILE=nav_mobile_html,
+        THIS_WEEK=this_week_html,
         NEEDS_YOU=needs_you_html,
         BOARD=board_html,
         CALENDAR=calendar_html,
