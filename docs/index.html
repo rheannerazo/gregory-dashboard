@@ -1,150 +1,176 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
-<title>The Startup Architect &mdash; Status</title>
+<title>Gregory Shepard &mdash; The Startup Architect &mdash; Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
+  --bg:#f6f5f2;
+  --panel:#ffffff;
+  --border:#e8e6e1;
+  --text:#1f2430;
+  --muted:#8a8f98;
   --navy:#0A1730;
   --blue:#1A8CF0;
-  --bg:#f5f7fa;
-  --text:#1f2937;
-  --muted:#6b7280;
+  --amber:#d97706;
+  --amber-bg:#fff7e6;
+  --amber-border:#f0c674;
+  --green:#16a34a;
 }
 *{box-sizing:border-box;}
-body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
-h1,h2,h3,h4{font-family:'Montserrat',system-ui,sans-serif;}
-
-header{background:var(--navy);color:#fff;padding:36px 24px 30px;}
-.header-inner{max-width:1100px;margin:0 auto;}
-header .eyebrow{color:var(--blue);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-header h1{font-family:'Anton',Montserrat,sans-serif;font-weight:400;margin:0 0 8px;font-size:clamp(28px,5vw,42px);letter-spacing:.5px;}
-header .subtitle{color:#cdd7e8;font-size:15px;margin:0 0 18px;max-width:640px;line-height:1.5;}
-header .asof{color:#9fb0cc;font-size:12px;margin-bottom:14px;}
-.overall-wrap{max-width:420px;}
-.overall-label{display:flex;justify-content:space-between;font-size:12px;color:#cdd7e8;margin-bottom:6px;}
-.overall-bar{background:rgba(255,255,255,.15);border-radius:20px;height:12px;overflow:hidden;}
-.overall-bar>div{background:var(--blue);height:100%;border-radius:20px;}
-
-.wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
-
-h2{color:var(--navy);font-size:22px;font-weight:800;margin:44px 0 6px;padding-bottom:10px;border-bottom:3px solid var(--blue);}
-h2:first-of-type{margin-top:0;}
-.section-sub{color:var(--muted);font-size:13px;margin:0 0 18px;}
-
-.card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+a{color:var(--blue);}
 .muted{color:var(--muted);font-size:.92em;}
 
+/* Top bar */
+.topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.tb-wordmark{font-weight:800;font-size:15px;line-height:1.25;color:var(--navy);}
+.tb-wordmark .tb-sub{display:block;font-weight:600;font-size:11px;color:var(--muted);margin-top:2px;}
+.tb-stats{display:flex;gap:26px;margin-left:8px;}
+.tb-stat{line-height:1.2;}
+.tb-num{font-size:20px;font-weight:800;color:var(--text);}
+.tb-label{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.tb-right{margin-left:auto;text-align:right;}
+.tb-updated{font-size:12px;color:var(--muted);}
+.tb-dept{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 70px;}
+
+h2{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}
+.section{margin-top:40px;}
+.section:first-child{margin-top:0;}
+.section-sub{color:var(--muted);font-size:12.5px;margin:0 0 16px;}
+
 /* Needs you */
-.needgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
-.needcard{background:#fff;border-left:4px solid var(--blue);border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
-.ny-title{font-weight:700;color:var(--navy);font-size:14.5px;margin-bottom:6px;}
-.ny-line{font-size:13.5px;color:#374151;line-height:1.5;}
-.ny-note{font-size:12.5px;color:var(--muted);margin-top:6px;font-style:italic;}
-.ny-due{font-size:12px;color:var(--blue);font-weight:600;margin-top:8px;}
+.needs-section{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:8px;}
+.needs-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.needs-flag{font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--amber);}
+.needs-sub{font-size:12px;}
+.needgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+.needcard{background:#fff;border:1px solid var(--amber-border);border-left:3px solid var(--amber);border-radius:10px;padding:14px 16px;}
+.ny-title{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px;}
+.ny-line{font-size:13px;color:#3a3f4a;line-height:1.5;}
+.ny-due{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:8px;}
 
-/* In progress */
-.proggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
-.progitem{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);border-top:3px solid var(--blue);}
-.pi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
-.pi-title{font-weight:700;color:var(--navy);font-size:14px;}
-.pi-desc{font-size:13px;color:#374151;line-height:1.45;}
-.pi-meta{margin-top:8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;}
+/* Plan cards */
+.plangrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+.plancard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.plan-name{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:10px;}
+.plan-bar{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;}
+.plan-bar>div{background:var(--blue);height:100%;border-radius:20px;}
+.plan-count{font-size:11.5px;margin-bottom:10px;}
+.plan-focus{font-size:12.5px;color:#3a3f4a;line-height:1.4;border-top:1px solid var(--border);padding-top:10px;}
 
-/* Done */
-.donegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
-.donegroup{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
-.donegroup h4{margin:0 0 8px;color:var(--navy);font-size:13.5px;}
-.donelist{list-style:none;margin:0;padding:0;}
-.donelist li{font-size:13px;color:#374151;padding:5px 0 5px 22px;position:relative;border-top:1px solid #eef1f5;}
-.donelist li:first-child{border-top:none;}
-.donelist li::before{content:"\2713";position:absolute;left:0;color:#16a34a;font-weight:700;}
-
-/* Where things stand */
-.wsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
-.wscard{background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(10,23,48,.06);}
-.ws-name{font-weight:700;color:var(--navy);font-size:13px;margin-bottom:8px;}
-.ws-state{font-weight:800;font-size:15px;margin-bottom:4px;}
-.ws-count{font-size:12px;}
+/* Calendar */
+.cal-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+.cal-months{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.cal-month-title{font-size:11.5px;font-weight:800;color:var(--navy);margin-bottom:8px;text-align:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px;}
+.cal-day{position:relative;text-align:center;font-size:10.5px;color:var(--text);padding:4px 0;border-radius:5px;}
+.cal-day span{position:relative;z-index:1;}
+.cal-day.empty{visibility:hidden;}
+.cal-day.is-today{background:var(--navy);color:#fff;font-weight:800;}
+.cal-day.has-event:not(.is-today){background:#e8f2fe;font-weight:700;color:var(--blue);}
+.cal-day.has-event::after{content:"";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}
+.cal-day.is-today.has-event::after{background:#fff;}
+.cal-upcoming{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.cal-upcoming-title{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.cal-list{display:flex;flex-direction:column;gap:12px;}
+.cal-row{display:flex;gap:12px;align-items:flex-start;}
+.cal-badge{flex-shrink:0;background:#e8f2fe;color:var(--blue);font-weight:800;font-size:11px;border-radius:7px;padding:5px 9px;white-space:nowrap;}
+.cal-badge-tbd{background:#f3f2ee;color:var(--muted);}
+.cal-title{font-weight:700;font-size:13px;color:var(--navy);}
+.cal-where{font-size:12px;margin-top:2px;}
 
 /* Scoreboard */
 .scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
-.score{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(10,23,48,.06);border-top:4px solid var(--navy);}
-.score-label{font-size:13px;color:var(--navy);font-weight:700;}
-.score-num{font-size:26px;font-weight:800;color:var(--blue);margin:8px 0;}
-.progress{background:#e5e7eb;border-radius:20px;height:10px;overflow:hidden;}
+.score{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.score-label{font-size:12.5px;color:var(--navy);font-weight:700;}
+.score-num{font-size:25px;font-weight:800;color:var(--blue);margin:8px 0;}
+.progress{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;}
 .progress>div{background:var(--blue);height:100%;}
 
-/* Key dates */
-.datelist{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(10,23,48,.06);overflow:hidden;}
-.daterow{display:flex;gap:16px;align-items:baseline;padding:12px 18px;border-top:1px solid #eef1f5;}
-.daterow:first-child{border-top:none;}
-.date-day{flex-shrink:0;width:70px;font-weight:800;color:var(--blue);font-size:13px;}
-.date-task{font-size:13.5px;color:#374151;}
-.daterow.curated{background:#f7fafe;}
-
 /* Maps */
-.maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
-.mapcard{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(10,23,48,.06);}
-.mapcard h3{margin:0 0 10px;color:var(--navy);font-size:15px;}
-.mapcard img{width:100%;border-radius:8px;border:1px solid #eef1f5;display:block;margin-bottom:10px;}
+.maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.mapcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.mapcard h3{margin:0 0 10px;color:var(--navy);font-size:14.5px;}
+.mapcard img{width:100%;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:10px;}
 .mapcard p{margin:0;line-height:1.5;}
 
-.foot{margin-top:56px;color:#9ca3af;font-size:12px;text-align:center;}
+.foot{margin-top:56px;color:var(--muted);font-size:11.5px;text-align:center;}
 
+@media (max-width:900px){
+  .cal-wrap{grid-template-columns:1fr;}
+  .cal-months{grid-template-columns:1fr;}
+}
 @media (max-width:640px){
-  .wrap{padding:24px 16px 60px;}
-  header{padding:28px 16px 24px;}
-  h2{font-size:19px;}
+  .wrap{padding:22px 16px 56px;}
+  .topbar-inner{padding:14px 16px;}
+  .tb-right{margin-left:0;text-align:left;}
 }
 </style>
 </head>
 <body>
-<header>
-  <div class="header-inner">
-    <div class="eyebrow">The Startup Architect</div>
-    <h1>Status Dashboard</h1>
-    <p class="subtitle">A plain-language snapshot of where the launch stands: what's done, what's moving, and the couple of things only you can unblock.</p>
-    <div class="asof">As of Saturday, July 04, 2026</div>
-    <div class="overall-wrap">
-      <div class="overall-label"><span>Overall progress</span><span>7/44 tasks done</span></div>
-      <div class="overall-bar"><div style="width:16%"></div></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="tb-wordmark">Gregory Shepard &mdash; The Startup Architect<span class="tb-sub">Prepared by your Chief of Staff department</span></div>
+    <div class="tb-stats">
+      <div class="tb-stat"><div class="tb-num">16%</div><div class="tb-label">Overall progress</div></div>
+      <div class="tb-stat"><div class="tb-num">7/44</div><div class="tb-label">Tasks done</div></div>
+      <div class="tb-stat"><div class="tb-num">17</div><div class="tb-label">Active workstreams</div></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-updated">Updated Sunday, July 05, 2026</div>
     </div>
   </div>
 </header>
 
 <div class="wrap">
 
-  <h2 id="needs-you">Needs You, Greg</h2>
-  <p class="section-sub">The couple of things only you can move forward. Everything else is being handled.</p>
+  
+<section class="needs-section">
+  <div class="needs-head">
+    <span class="needs-flag">NEEDS YOU, GREG</span>
+    <span class="needs-sub muted">The couple of things only you can move forward.</span>
+  </div>
   <div class="needgrid"><div class="needcard"><div class="ny-title">Greg unblocks access</div><div class="ny-line">Share access to the remaining tools and accounts so we can finish setting them up.</div></div><div class="needcard"><div class="ny-title">Get Greg&#x27;s travel calendar</div><div class="ny-line">Greg will send his travel calendar; use it to schedule events and asks around his availability.</div></div></div>
+</section>
 
-  <h2 id="in-progress">In Progress</h2>
-  <p class="section-sub">Actively being worked on right now.</p>
-  <div class="proggrid"><div class="progitem"><div class="pi-head"><span class="pi-title">Build website registration page</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc">The landing page all traffic points to</div><div class="pi-meta muted">Website</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Cross-platform positioning rollout</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc">Set brand on Substack, X, IG, FB, YT, TikTok, LI company/newsletter</div><div class="pi-meta muted">Brand</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Daily content engine</span><span class="badge" style="background:#0d9488">Ongoing</span></div><div class="pi-desc">Recurring: LinkedIn post/engage/outreach + repurpose 1 piece</div><div class="pi-meta muted">Content</div></div><div class="progitem"><div class="pi-head"><span class="pi-title">Optimize the E-speakers profile</span><span class="badge" style="background:#1A8CF0">In progress</span></div><div class="pi-desc"></div><div class="pi-meta muted">Growth</div></div></div>
 
-  <h2 id="where-things-stand">Where Things Stand</h2>
-  <p class="section-sub">A one-word status for each area of the launch.</p>
-  <div class="wsgrid"><div class="wscard"><div class="ws-name">Brand</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">1/3 done</div></div><div class="wscard"><div class="ws-name">Commerce</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/2 done</div></div><div class="wscard"><div class="ws-name">Community</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Content</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">0/8 done</div></div><div class="wscard"><div class="ws-name">Event</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Event ops</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Growth</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Launch</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/5 done</div></div><div class="wscard"><div class="ws-name">Ops</div><div class="ws-state" style="color:#d97706">Waiting on you</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Performance tracking</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Program</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/5 done</div></div><div class="wscard"><div class="ws-name">Promo</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Security</div><div class="ws-state" style="color:#16a34a">Done</div><div class="ws-count muted">1/1 done</div></div><div class="wscard"><div class="ws-name">Setup</div><div class="ws-state" style="color:#d97706">Waiting on you</div><div class="ws-count muted">0/1 done</div></div><div class="wscard"><div class="ws-name">Sponsors</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">0/3 done</div></div><div class="wscard"><div class="ws-name">Systems</div><div class="ws-state" style="color:#6b7280">Up next</div><div class="ws-count muted">1/2 done</div></div><div class="wscard"><div class="ws-name">Website</div><div class="ws-state" style="color:#1A8CF0">Building</div><div class="ws-count muted">0/1 done</div></div></div>
+  <div class="section">
+    <h2>The Plan</h2>
+    <p class="section-sub">Every workstream your Chief of Staff department is running, with current progress and focus.</p>
+    <div class="plangrid"><div class="plancard"><div class="plan-name">Brand</div><div class="plan-bar"><div style="width:33%"></div></div><div class="plan-count muted">1/3 done</div><div class="plan-focus">Cross-platform positioning rollout</div></div><div class="plancard"><div class="plan-name">Commerce</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Community</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Content</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/8 done</div><div class="plan-focus">Daily content engine</div></div><div class="plancard"><div class="plan-name">Event</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Event ops</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Growth</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus">Optimize the E-speakers profile</div></div><div class="plancard"><div class="plan-name">Launch</div><div class="plan-bar"><div style="width:20%"></div></div><div class="plan-count muted">1/5 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Ops</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Performance tracking</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Program</div><div class="plan-bar"><div style="width:20%"></div></div><div class="plan-count muted">1/5 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Promo</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Security</div><div class="plan-bar"><div style="width:100%"></div></div><div class="plan-count muted">1/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Setup</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Sponsors</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Systems</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Website</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus">Build website registration page</div></div></div>
+  </div>
 
-  <h2 id="scoreboard">Scoreboard</h2>
-  <p class="section-sub">Event funnel numbers so far, next to the goal.</p>
-  <div class="scoregrid"><div class="score"><div class="score-label">Lecture registrations</div><div class="score-num">0 <span class="muted">/ 45</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Lecture attendance</div><div class="score-num">0 <span class="muted">/ 30</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">2-Day seats sold</div><div class="score-num">0 <span class="muted">/ 10</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Sponsors closed ($1k)</div><div class="score-num">0 <span class="muted">/ 3</span></div><div class="progress"><div style="width:0%"></div></div></div></div>
+  <div class="section">
+    <h2>Calendar</h2>
+    <p class="section-sub">What's on the calendar for the launch.</p>
+    
+<div class="cal-wrap">
+  <div class="cal-months"><div class="cal-month"><div class="cal-month-title">July 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day is-today"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">August 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day has-event"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">September 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day has-event"><span>21</span></div><div class="cal-day has-event"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div></div>
+  <div class="cal-upcoming">
+    <div class="cal-upcoming-title">Upcoming</div>
+    <div class="cal-list"><div class="cal-row"><div class="cal-badge cal-badge-tbd">date TBD</div><div class="cal-info"><div class="cal-title">Know Your Phase Masterclass</div><div class="cal-where muted">The Bornemann Theatre, San Marcos</div></div></div><div class="cal-row"><div class="cal-badge">Sep 21&ndash;22</div><div class="cal-info"><div class="cal-title">UN speaking engagement (lead)</div><div class="cal-where muted">TBC</div></div></div></div>
+  </div>
+</div>
 
-  <h2 id="key-dates">Key Dates</h2>
-  <p class="section-sub">What's coming up.</p>
-  <div class="datelist"><div class="daterow curated"><div class="date-day">&middot;</div><div class="date-task">Know Your Phase masterclass &mdash; The Bornemann Theatre, San Marcos &mdash; early August 2026 (date TBD)</div></div><div class="daterow curated"><div class="date-day">&middot;</div><div class="date-task">From Vision to Exit &mdash; 2-day intensive &mdash; following the masterclass</div></div></div>
+  </div>
 
-  <h2 id="done">Done</h2>
-  <p class="section-sub">Wins so far, grouped by area.</p>
-  <div class="donegrid"><div class="donegroup"><h4>Brand <span class="muted">(1)</span></h4><ul class="donelist"><li>Put Greg&#x27;s brand kit in the Drive</li></ul></div><div class="donegroup"><h4>Launch <span class="muted">(1)</span></h4><ul class="donelist"><li>Confirm ticket pricing</li></ul></div><div class="donegroup"><h4>Ops <span class="muted">(1)</span></h4><ul class="donelist"><li>Set up recurring meetings (Mon + Fri)</li></ul></div><div class="donegroup"><h4>Program <span class="muted">(1)</span></h4><ul class="donelist"><li>Review the Master Manual</li></ul></div><div class="donegroup"><h4>Systems <span class="muted">(1)</span></h4><ul class="donelist"><li>Stand up the master calendar</li></ul></div></div>
+  <div class="section">
+    <h2>Scoreboard</h2>
+    <p class="section-sub">Event funnel numbers so far, next to the goal.</p>
+    <div class="scoregrid"><div class="score"><div class="score-label">Lecture registrations</div><div class="score-num">0 <span class="muted">/ 45</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Lecture attendance</div><div class="score-num">0 <span class="muted">/ 30</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">2-Day seats sold</div><div class="score-num">0 <span class="muted">/ 10</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Sponsors closed ($1k)</div><div class="score-num">0 <span class="muted">/ 3</span></div><div class="progress"><div style="width:0%"></div></div></div></div>
+  </div>
 
-  <h2 id="maps">Maps &amp; Big Picture</h2>
-  <p class="section-sub">The visual plan.</p>
-  <div class="maps"><div class="mapcard"><h3>Your Role with Greg</h3><img src="assets/maps/image1.png" alt="Your Role with Greg" loading="lazy"><p class="muted">One role, several components: LinkedIn, the content engine, the website, the funnel and sponsors are all part of this one Chief of Staff role.</p></div><div class="mapcard"><h3>The 8-Week Plan</h3><img src="assets/maps/image2.png" alt="The 8-Week Plan" loading="lazy"><p class="muted">Phase 1 by workstream across 8 weeks, building toward the Week 6 lecture and the Week 7 intensive.</p></div><div class="mapcard"><h3>Week 1, Day by Day</h3><img src="assets/maps/image3.png" alt="Week 1, Day by Day" loading="lazy"><p class="muted">The daily content engine plus each day&#x27;s build focus, Monday to Friday.</p></div><div class="mapcard"><h3>The Content Engine</h3><img src="assets/maps/image4.png" alt="The Content Engine" loading="lazy"><p class="muted">Create once, publish everywhere: one source piece repurposed to every owned audience and social channel.</p></div><div class="mapcard"><h3>Event Run-of-Show</h3><img src="assets/maps/image5.png" alt="Event Run-of-Show" loading="lazy"><p class="muted">The single live-event flow: 30 min networking + merch, 45 min talk, 5 min break, 30 min book signing.</p></div></div>
+  <div class="section">
+    <h2>Maps &amp; Big Picture</h2>
+    <p class="section-sub">The visual plan.</p>
+    <div class="maps"><div class="mapcard"><h3>Your Role with Greg</h3><img src="assets/maps/image1.png" alt="Your Role with Greg" loading="lazy"><p class="muted">One role, several components: LinkedIn, the content engine, the website, the funnel and sponsors are all part of this one Chief of Staff role.</p></div><div class="mapcard"><h3>The 8-Week Plan</h3><img src="assets/maps/image2.png" alt="The 8-Week Plan" loading="lazy"><p class="muted">Phase 1 by workstream across 8 weeks, building toward the Week 6 lecture and the Week 7 intensive.</p></div><div class="mapcard"><h3>Week 1, Day by Day</h3><img src="assets/maps/image3.png" alt="Week 1, Day by Day" loading="lazy"><p class="muted">The daily content engine plus each day&#x27;s build focus, Monday to Friday.</p></div><div class="mapcard"><h3>The Content Engine</h3><img src="assets/maps/image4.png" alt="The Content Engine" loading="lazy"><p class="muted">Create once, publish everywhere: one source piece repurposed to every owned audience and social channel.</p></div><div class="mapcard"><h3>Event Run-of-Show</h3><img src="assets/maps/image5.png" alt="Event Run-of-Show" loading="lazy"><p class="muted">The single live-event flow: 30 min networking + merch, 45 min talk, 5 min break, 30 min book signing.</p></div></div>
+  </div>
 
   <div class="foot">The Startup Architect &middot; status snapshot, updated periodically</div>
 </div>
