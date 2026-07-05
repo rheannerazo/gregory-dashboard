@@ -13,6 +13,7 @@
   --muted:#8a8f98;
   --navy:#0A1730;
   --blue:#1A8CF0;
+  --blue-bg:#e8f2fe;
   --amber:#d97706;
   --amber-bg:#fff7e6;
   --amber-border:#f0c674;
@@ -22,29 +23,69 @@
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
 a{color:var(--blue);}
 .muted{color:var(--muted);font-size:.92em;}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:5px 12px;border-radius:999px;}
+.pill-ontrack{color:var(--blue);border:1px solid var(--blue);background:#fff;}
 
 /* Top bar */
 .topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
-.topbar-inner{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
-.tb-wordmark{font-weight:800;font-size:15px;line-height:1.25;color:var(--navy);}
-.tb-wordmark .tb-sub{display:block;font-weight:600;font-size:11px;color:var(--muted);margin-top:2px;}
-.tb-stats{display:flex;gap:26px;margin-left:8px;}
+.topbar-inner{max-width:1440px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.tb-wordmark{font-weight:800;font-size:14.5px;color:var(--navy);white-space:nowrap;}
+.tb-stats{display:flex;gap:26px;}
 .tb-stat{line-height:1.2;}
 .tb-num{font-size:20px;font-weight:800;color:var(--text);}
 .tb-label{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.tb-center{flex:1;display:flex;justify-content:center;}
 .tb-right{margin-left:auto;text-align:right;}
-.tb-updated{font-size:12px;color:var(--muted);}
-.tb-dept{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;}
+.tb-updated{font-size:12px;color:var(--muted);white-space:nowrap;}
 
-.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 70px;}
+/* Layout -- sidebar persists; only the active [data-view] section shows. */
+.layout{
+  max-width:1440px;margin:0 auto;padding:20px 24px 60px;
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  grid-template-areas:"sidebar center";
+  gap:20px;align-items:start;
+}
+.layout-sidebar{grid-area:sidebar;min-width:0;}
+.layout-center{grid-area:center;min-width:0;}
+html.js-ready [data-view]{display:none;}
+html.js-ready [data-view].view-active{display:block;}
 
-h2{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}
-.section{margin-top:40px;}
-.section:first-child{margin-top:0;}
+/* Sidebar */
+.sidebar{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;position:sticky;top:76px;}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:var(--blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-title{font-weight:800;font-size:13.5px;line-height:1.2;}
+.logo-sub{font-size:10.5px;color:var(--muted);}
+
+.nav{display:flex;flex-direction:column;gap:2px;margin-bottom:16px;}
+.navlink{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;padding:8px 10px;border-radius:8px;}
+.navlink:hover{background:#f7f6f3;}
+.navlink.active{background:var(--blue-bg);color:var(--blue);}
+.navicon{font-size:14px;width:16px;text-align:center;}
+.nav-mobile{display:none;}
+
+.roi-card{background:var(--blue-bg);border-radius:10px;padding:14px 14px 12px;margin-bottom:18px;}
+.roi-label{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;}
+.roi-amount{font-size:26px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:8px;}
+.roi-bar{height:5px;border-radius:3px;background:#cfe6fb;overflow:hidden;margin-bottom:8px;}
+.roi-bar-fill{height:100%;background:var(--blue);border-radius:3px;}
+.roi-sub{font-size:10.5px;color:var(--muted);font-style:italic;line-height:1.4;}
+
+.kd-card{background:#f7f6f3;border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.kd-head{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.kd-list{display:flex;flex-direction:column;gap:9px;}
+.kd-row{display:flex;align-items:flex-start;gap:8px;}
+.kd-badge{flex-shrink:0;font-size:9.5px;font-weight:800;color:var(--blue);background:#fff;border-radius:5px;padding:3px 7px;white-space:nowrap;}
+.kd-title{font-size:11.5px;color:#3a3f4a;line-height:1.35;}
+
+/* Center panel */
+.center{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
+h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}
 .section-sub{color:var(--muted);font-size:12.5px;margin:0 0 16px;}
 
 /* Needs you */
-.needs-section{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:8px;}
+.needs-section{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:20px;}
 .needs-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
 .needs-flag{font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--amber);}
 .needs-sub{font-size:12px;}
@@ -54,36 +95,23 @@ h2{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;m
 .ny-line{font-size:13px;color:#3a3f4a;line-height:1.5;}
 .ny-due{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:8px;}
 
-/* Plan cards */
-.plangrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
-.plancard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
-.plan-name{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:10px;}
-.plan-bar{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;}
-.plan-bar>div{background:var(--blue);height:100%;border-radius:20px;}
-.plan-count{font-size:11.5px;margin-bottom:10px;}
-.plan-focus{font-size:12.5px;color:#3a3f4a;line-height:1.4;border-top:1px solid var(--border);padding-top:10px;}
+/* Kanban board */
+.board{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:14px;}
+.col{background:#faf9f7;border-radius:10px;padding:10px;min-width:0;}
+.col-head{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;padding:4px 4px 10px;}
+.col-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.col-name{flex:1;}
+.col-count{color:var(--muted);font-weight:700;}
+.col-body{display:flex;flex-direction:column;gap:10px;}
+.col-empty{padding:6px 4px;font-size:11.5px;color:var(--muted);}
+.col-more{padding:2px 4px;font-size:11px;}
 
-/* Calendar */
-.cal-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
-.cal-months{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}
-.cal-month-title{font-size:11.5px;font-weight:800;color:var(--navy);margin-bottom:8px;text-align:center;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-dow{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px;}
-.cal-day{position:relative;text-align:center;font-size:10.5px;color:var(--text);padding:4px 0;border-radius:5px;}
-.cal-day span{position:relative;z-index:1;}
-.cal-day.empty{visibility:hidden;}
-.cal-day.is-today{background:var(--navy);color:#fff;font-weight:800;}
-.cal-day.has-event:not(.is-today){background:#e8f2fe;font-weight:700;color:var(--blue);}
-.cal-day.has-event::after{content:"";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}
-.cal-day.is-today.has-event::after{background:#fff;}
-.cal-upcoming{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
-.cal-upcoming-title{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
-.cal-list{display:flex;flex-direction:column;gap:12px;}
-.cal-row{display:flex;gap:12px;align-items:flex-start;}
-.cal-badge{flex-shrink:0;background:#e8f2fe;color:var(--blue);font-weight:800;font-size:11px;border-radius:7px;padding:5px 9px;white-space:nowrap;}
-.cal-badge-tbd{background:#f3f2ee;color:var(--muted);}
-.cal-title{font-weight:700;font-size:13px;color:var(--navy);}
-.cal-where{font-size:12px;margin-top:2px;}
+.taskcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;}
+.task-title-row{margin-bottom:6px;}
+.task-title{font-weight:700;font-size:13.5px;line-height:1.3;color:var(--navy);}
+.task-desc{font-size:12px;color:#5b606b;line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{background:#f3f2ee;color:#5b606b;font-size:10px;border-radius:5px;padding:2px 7px;}
 
 /* Scoreboard */
 .scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
@@ -93,44 +121,151 @@ h2{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;m
 .progress{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;}
 .progress>div{background:var(--blue);height:100%;}
 
-/* Maps */
+/* Calendar */
+.cal-body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;}
+.cal-months{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.cal-month{background:#faf9f7;border-radius:10px;padding:10px;}
+.cal-month-title{font-size:11.5px;font-weight:800;color:var(--navy);margin-bottom:8px;text-align:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px;}
+.cal-day{position:relative;text-align:center;font-size:10.5px;color:var(--text);padding:4px 0;border-radius:5px;}
+.cal-day span{position:relative;z-index:1;}
+.cal-day.empty{visibility:hidden;}
+.cal-day.is-today{background:var(--navy);color:#fff;font-weight:800;}
+.cal-day.has-event:not(.is-today){background:var(--blue-bg);font-weight:700;color:var(--blue);}
+.cal-day.has-event::after{content:"";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}
+.cal-day.is-today.has-event::after{background:#fff;}
+.cal-upcoming-head{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.cal-upcoming-list{display:flex;flex-direction:column;gap:12px;}
+.cal-row{display:flex;gap:12px;align-items:flex-start;}
+.cal-badge{flex-shrink:0;background:var(--blue-bg);color:var(--blue);font-weight:800;font-size:11px;border-radius:7px;padding:5px 9px;white-space:nowrap;}
+.cal-badge-tbd{background:#f3f2ee;color:var(--muted);}
+.cal-title{font-weight:700;font-size:13px;color:var(--navy);}
+.cal-where{font-size:12px;margin-top:2px;}
+
+/* Maps / roadmap */
 .maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
 .mapcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
 .mapcard h3{margin:0 0 10px;color:var(--navy);font-size:14.5px;}
 .mapcard img{width:100%;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:10px;}
 .mapcard p{margin:0;line-height:1.5;}
 
-.foot{margin-top:56px;color:var(--muted);font-size:11.5px;text-align:center;}
+.foot{margin-top:32px;color:var(--muted);font-size:11.5px;text-align:center;}
 
-@media (max-width:900px){
-  .cal-wrap{grid-template-columns:1fr;}
-  .cal-months{grid-template-columns:1fr;}
+@media (max-width:999px){
+  .layout{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "center"
+      "sidebar";
+  }
+  .sidebar{position:static;}
+  .cal-body{grid-template-columns:1fr;}
+  .board{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
-@media (max-width:640px){
-  .wrap{padding:22px 16px 56px;}
-  .topbar-inner{padding:14px 16px;}
-  .tb-right{margin-left:0;text-align:left;}
+@media (max-width:767px){
+  .layout{padding:12px 12px 60px;gap:16px;}
+  .topbar-inner{padding:10px 12px;gap:10px;}
+  .tb-stats{gap:16px;}
+  .tb-num{font-size:17px;}
+  .tb-label{font-size:8.5px;}
+
+  .nav-desktop{display:none;}
+  .nav-mobile{
+    display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    margin:0;padding:10px 12px;background:var(--panel);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-mobile .navlink{flex-shrink:0;padding:8px 12px;background:#f7f6f3;white-space:nowrap;min-height:36px;}
+  .nav-mobile .navlink.active{background:var(--blue-bg);color:var(--blue);}
+
+  .board{
+    display:flex;
+    grid-template-columns:unset;
+    gap:12px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    margin:0 -4px;
+    padding:0 4px 8px;
+  }
+  .col{
+    flex:0 0 85vw;
+    width:85vw;
+    max-height:70vh;
+    overflow-y:auto;
+    scroll-snap-align:start;
+  }
+  .col-head{position:sticky;top:0;background:#faf9f7;z-index:1;}
+
+  .cal-months{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="tb-wordmark">Gregory Shepard &mdash; The Startup Architect<span class="tb-sub">Prepared by your Chief of Staff department</span></div>
+    <div class="tb-wordmark">Gregory Shepard &mdash; The Startup Architect</div>
     <div class="tb-stats">
       <div class="tb-stat"><div class="tb-num">16%</div><div class="tb-label">Overall progress</div></div>
       <div class="tb-stat"><div class="tb-num">7/44</div><div class="tb-label">Tasks done</div></div>
       <div class="tb-stat"><div class="tb-num">17</div><div class="tb-label">Active workstreams</div></div>
     </div>
+    <div class="tb-center"><span class="pill pill-ontrack">ON TRACK</span></div>
     <div class="tb-right">
-      <div class="tb-updated">Updated Sunday, July 05, 2026</div>
+      <div class="tb-updated">Updated Monday, July 06, 2026</div>
     </div>
   </div>
 </header>
+<div class="layout-nav-mobile">
+    <nav class="nav nav-mobile">
+      <a class="navlink" data-view-link="overview" href="#overview"><span class="navicon">📋</span>Overview</a>
+      <a class="navlink" data-view-link="calendar" href="#calendar"><span class="navicon">📅</span>Calendar</a>
+      <a class="navlink" data-view-link="scoreboard" href="#scoreboard"><span class="navicon">🎯</span>Scoreboard</a>
+      <a class="navlink" data-view-link="roadmap" href="#roadmap"><span class="navicon">🗺</span>Roadmap</a>
+    </nav>
+</div>
 
-<div class="wrap">
+<div class="layout">
+  <div class="layout-sidebar">
+<aside class="sidebar">
+  <div class="logo-row">
+    <div class="logo-mark">GS</div>
+    <div class="logo-text">
+      <div class="logo-title">The Startup Architect</div>
+      <div class="logo-sub">status dashboard</div>
+    </div>
+  </div>
+  
+    <nav class="nav nav-desktop">
+      <a class="navlink" data-view-link="overview" href="#overview"><span class="navicon">📋</span>Overview</a>
+      <a class="navlink" data-view-link="calendar" href="#calendar"><span class="navicon">📅</span>Calendar</a>
+      <a class="navlink" data-view-link="scoreboard" href="#scoreboard"><span class="navicon">🎯</span>Scoreboard</a>
+      <a class="navlink" data-view-link="roadmap" href="#roadmap"><span class="navicon">🗺</span>Roadmap</a>
+    </nav>
 
   
+    <div class="roi-card" id="progress">
+      <div class="roi-label">OVERALL PROGRESS</div>
+      <div class="roi-amount">16%</div>
+      <div class="roi-bar"><div class="roi-bar-fill" style="width:16%"></div></div>
+      <div class="roi-sub">prepared by your Chief of Staff department</div>
+    </div>
+
+  
+    <div class="kd-card">
+      <div class="kd-head">KEY DATES</div>
+      <div class="kd-list"><div class="kd-row"><span class="kd-badge">TBD</span><span class="kd-title">Know Your Phase Masterclass</span></div><div class="kd-row"><span class="kd-badge">Sep 21</span><span class="kd-title">UN speaking engagement (lead)</span></div></div>
+    </div>
+
+</aside>
+</div>
+
+  <section class="center layout-center" id="overview" data-view="overview">
+    <h2 class="view-title">Overview</h2>
+    <p class="section-sub">Every workstream your Chief of Staff department is running, at a glance.</p>
+    
 <section class="needs-section">
   <div class="needs-head">
     <span class="needs-flag">NEEDS YOU, GREG</span>
@@ -139,39 +274,164 @@ h2{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;m
   <div class="needgrid"><div class="needcard"><div class="ny-title">Greg unblocks access</div><div class="ny-line">Share access to the remaining tools and accounts so we can finish setting them up.</div></div><div class="needcard"><div class="ny-title">Get Greg&#x27;s travel calendar</div><div class="ny-line">Greg will send his travel calendar; use it to schedule events and asks around his availability.</div></div></div>
 </section>
 
+    <div class="board">
+    <div class="col">
+      <div class="col-head">
+        <span class="col-dot" style="background:#1A8CF0"></span>
+        <span class="col-name">IN PROGRESS</span>
+        <span class="col-count">5</span>
+      </div>
+      <div class="col-body">
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Build website registration page</div></div>
+  <div class="tag-row"><span class="tag">Website</span></div>
+  <div class="task-desc">The landing page all traffic points to</div>
+</div>
 
-  <div class="section">
-    <h2>The Plan</h2>
-    <p class="section-sub">Every workstream your Chief of Staff department is running, with current progress and focus.</p>
-    <div class="plangrid"><div class="plancard"><div class="plan-name">Brand</div><div class="plan-bar"><div style="width:33%"></div></div><div class="plan-count muted">1/3 done</div><div class="plan-focus">Cross-platform positioning rollout</div></div><div class="plancard"><div class="plan-name">Commerce</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Community</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Content</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/8 done</div><div class="plan-focus">Daily content engine</div></div><div class="plancard"><div class="plan-name">Event</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Event ops</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Growth</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus">Optimize the E-speakers profile</div></div><div class="plancard"><div class="plan-name">Launch</div><div class="plan-bar"><div style="width:20%"></div></div><div class="plan-count muted">1/5 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Ops</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Performance tracking</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Program</div><div class="plan-bar"><div style="width:20%"></div></div><div class="plan-count muted">1/5 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Promo</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Security</div><div class="plan-bar"><div style="width:100%"></div></div><div class="plan-count muted">1/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Setup</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Sponsors</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/3 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Systems</div><div class="plan-bar"><div style="width:50%"></div></div><div class="plan-count muted">1/2 done</div><div class="plan-focus muted">Steady state -- no active build right now.</div></div><div class="plancard"><div class="plan-name">Website</div><div class="plan-bar"><div style="width:0%"></div></div><div class="plan-count muted">0/1 done</div><div class="plan-focus">Build website registration page</div></div></div>
-  </div>
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Create QR code to the 2-Day</div></div>
+  <div class="tag-row"><span class="tag">Launch</span></div>
+  <div class="task-desc">Use HOVERCODE (Greg client tool) for the QR, per client-tools rule. Needs T3 Hovercode access. Do not substitute a free generator.</div>
+</div>
 
-  <div class="section">
-    <h2>Calendar</h2>
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Cross-platform positioning rollout</div></div>
+  <div class="tag-row"><span class="tag">Brand</span></div>
+  <div class="task-desc">Positioning already updated on Threads/IG/X/Substack/TikTok + LinkedIn content cross-posted. IG + TikTok confirmed good. YouTube still pending.</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Daily content engine</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">Recurring: LinkedIn post/engage/outreach + repurpose 1 piece</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Optimize the E-speakers profile</div></div>
+  <div class="tag-row"><span class="tag">Growth</span></div>
+  
+</div>
+</div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="col-dot" style="background:#d97706"></span>
+        <span class="col-name">WAITING ON YOU</span>
+        <span class="col-count">2</span>
+      </div>
+      <div class="col-body">
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Greg unblocks access</div></div>
+  <div class="tag-row"><span class="tag">Setup</span></div>
+  
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Get Greg&#x27;s travel calendar</div></div>
+  <div class="tag-row"><span class="tag">Ops</span></div>
+  <div class="task-desc">Greg will send his travel calendar; use it to schedule events and asks around his availability.</div>
+</div>
+</div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="col-dot" style="background:#16a34a"></span>
+        <span class="col-name">RECENTLY COMPLETED</span>
+        <span class="col-count">5</span>
+      </div>
+      <div class="col-body">
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Confirm ticket pricing</div></div>
+  <div class="tag-row"><span class="tag">Launch</span></div>
+  <div class="task-desc">Pricing LOCKED at the meeting. Drop the confirm-on-Monday step.</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Review the Master Manual</div></div>
+  <div class="tag-row"><span class="tag">Program</span></div>
+  <div class="task-desc">Read Greg&#x27;s Master Manual end to end (To-Do List #1).</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Stand up the master calendar</div></div>
+  <div class="tag-row"><span class="tag">Systems</span></div>
+  <div class="task-desc">Every event + its promo countdown, plus the per-channel publishing calendar (Operational Plan, Days 1-14).</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Put Greg&#x27;s brand kit in the Drive</div></div>
+  <div class="tag-row"><span class="tag">Brand</span></div>
+  <div class="task-desc">Add Greg brand kit (colours, fonts, logo, assets) to the shared Drive so everything pulls from one source.</div>
+</div>
+
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">Set up recurring meetings (Mon + Fri)</div></div>
+  <div class="tag-row"><span class="tag">Ops</span></div>
+  <div class="task-desc">Create the recurring &#x27;Gregory &amp; Rheanne alignment&#x27; meeting Mon 8:00-8:30 (Greg&#x27;s time) and a Fri 8:00 check-in, same format.</div>
+</div>
+</div>
+    </div>
+</div>
+  </section>
+
+  <section class="center layout-center" id="calendar" data-view="calendar">
+    <h2 class="view-title">Calendar</h2>
     <p class="section-sub">What's on the calendar for the launch.</p>
     
-<div class="cal-wrap">
-  <div class="cal-months"><div class="cal-month"><div class="cal-month-title">July 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day is-today"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">August 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day has-event"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">September 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day has-event"><span>21</span></div><div class="cal-day has-event"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div></div>
+<div class="cal-body">
+  <div class="cal-months"><div class="cal-month"><div class="cal-month-title">July 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day is-today"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">August 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day has-event"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">September 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day has-event"><span>21</span></div><div class="cal-day has-event"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div></div>
   <div class="cal-upcoming">
-    <div class="cal-upcoming-title">Upcoming</div>
-    <div class="cal-list"><div class="cal-row"><div class="cal-badge cal-badge-tbd">date TBD</div><div class="cal-info"><div class="cal-title">Know Your Phase Masterclass</div><div class="cal-where muted">The Bornemann Theatre, San Marcos</div></div></div><div class="cal-row"><div class="cal-badge">Sep 21&ndash;22</div><div class="cal-info"><div class="cal-title">UN speaking engagement (lead)</div><div class="cal-where muted">TBC</div></div></div></div>
+    <div class="cal-upcoming-head">Upcoming</div>
+    <div class="cal-upcoming-list"><div class="cal-row"><div class="cal-badge cal-badge-tbd">date TBD</div><div class="cal-info"><div class="cal-title">Know Your Phase Masterclass</div><div class="cal-where muted">The Bornemann Theatre, San Marcos</div></div></div><div class="cal-row"><div class="cal-badge">Sep 21&ndash;22</div><div class="cal-info"><div class="cal-title">UN speaking engagement (lead)</div><div class="cal-where muted">TBC</div></div></div></div>
   </div>
 </div>
 
-  </div>
+  </section>
 
-  <div class="section">
-    <h2>Scoreboard</h2>
+  <section class="center layout-center" id="scoreboard" data-view="scoreboard">
+    <h2 class="view-title">Scoreboard</h2>
     <p class="section-sub">Event funnel numbers so far, next to the goal.</p>
     <div class="scoregrid"><div class="score"><div class="score-label">Lecture registrations</div><div class="score-num">0 <span class="muted">/ 45</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Lecture attendance</div><div class="score-num">0 <span class="muted">/ 30</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">2-Day seats sold</div><div class="score-num">0 <span class="muted">/ 10</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Sponsors closed ($1k)</div><div class="score-num">0 <span class="muted">/ 3</span></div><div class="progress"><div style="width:0%"></div></div></div></div>
-  </div>
+  </section>
 
-  <div class="section">
-    <h2>Maps &amp; Big Picture</h2>
+  <section class="center layout-center" id="roadmap" data-view="roadmap">
+    <h2 class="view-title">Roadmap</h2>
     <p class="section-sub">The visual plan.</p>
     <div class="maps"><div class="mapcard"><h3>Your Role with Greg</h3><img src="assets/maps/image1.png" alt="Your Role with Greg" loading="lazy"><p class="muted">One role, several components: LinkedIn, the content engine, the website, the funnel and sponsors are all part of this one Chief of Staff role.</p></div><div class="mapcard"><h3>The 8-Week Plan</h3><img src="assets/maps/image2.png" alt="The 8-Week Plan" loading="lazy"><p class="muted">Phase 1 by workstream across 8 weeks, building toward the Week 6 lecture and the Week 7 intensive.</p></div><div class="mapcard"><h3>Week 1, Day by Day</h3><img src="assets/maps/image3.png" alt="Week 1, Day by Day" loading="lazy"><p class="muted">The daily content engine plus each day&#x27;s build focus, Monday to Friday.</p></div><div class="mapcard"><h3>The Content Engine</h3><img src="assets/maps/image4.png" alt="The Content Engine" loading="lazy"><p class="muted">Create once, publish everywhere: one source piece repurposed to every owned audience and social channel.</p></div><div class="mapcard"><h3>Event Run-of-Show</h3><img src="assets/maps/image5.png" alt="Event Run-of-Show" loading="lazy"><p class="muted">The single live-event flow: 30 min networking + merch, 45 min talk, 5 min break, 30 min book signing.</p></div></div>
-  </div>
-
-  <div class="foot">The Startup Architect &middot; status snapshot, updated periodically</div>
+  </section>
 </div>
+
+<div class="foot">Prepared and kept current by your Chief of Staff department.</div>
+
+<script>
+// ---- View router: hash-based nav (sidebar + top bar persist; only the
+// center region swaps). Default view is #overview. No-JS fallback: the CSS
+// only hides non-active [data-view] sections once <html> has the .js-ready
+// class, which this script adds -- if JS never runs, every view just
+// renders stacked. This is the only script on the page: pure client-side
+// hash routing, no fetch, no POST, no external requests.
+(function() {
+  var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'roadmap'];
+
+  function currentView() {
+    var h = (location.hash || '').replace('#', '');
+    return VALID_VIEWS.indexOf(h) !== -1 ? h : 'overview';
+  }
+
+  function showView(view) {
+    document.querySelectorAll('[data-view]').forEach(function(el) {
+      el.classList.toggle('view-active', el.getAttribute('data-view') === view);
+    });
+    document.querySelectorAll('.navlink[data-view-link]').forEach(function(link) {
+      link.classList.toggle('active', link.getAttribute('data-view-link') === view);
+    });
+  }
+
+  document.documentElement.classList.add('js-ready');
+  window.addEventListener('hashchange', function() { showView(currentView()); });
+  showView(currentView());
+})();
+</script>
 </body></html>

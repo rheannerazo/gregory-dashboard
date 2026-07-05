@@ -10,11 +10,23 @@ This script does NOT import tracker_dashboard.py (that module can start a
 server as a side effect of being run). Instead the small set of data-loading
 helpers it needs are copied below.
 
-Visual system matches the private "Mission Control" page (light theme: page
-bg #f6f5f2, white cards, #e8e6e1 borders, #1f2430 text, #8a8f98 secondary,
-system-ui font, rounded 10-12px, chips/pills, sticky white top bar) but with
-the BLUE/NAVY brand accent instead of orange, and at department level only --
-no team members, agent names, roster, or internal ops detail.
+Visual design mirrors the private "Mission Control" page (build_mission_control.py)
+exactly: light theme, page bg #f6f5f2, white cards, #e8e6e1 borders, #1f2430
+text, #8a8f98 secondary, system-ui font, rounded 10-12px corners, chips/pills,
+sticky white top bar, left sidebar with a logo row + nav + ROI-style progress
+card, hash-routed views. Same layout patterns (sidebar + topbar + kanban +
+calendar), but:
+
+  - BLUE (#1A8CF0) / NAVY (#0A1730) brand accent, not orange.
+  - Strictly READ-ONLY: no buttons, no dialogs, no fetch/POST, no /api
+    anything. The only JS on the page is the hash-based view router (same
+    pattern as the reference).
+  - Department level only -- no team members, agent names, roster, squad, or
+    internal ops detail. Never uses the phrase "Mission Control".
+  - Every existing sanitization behavior is preserved byte-for-byte: safe(),
+    hits_blocklist(), task_is_sensitive(), clean_client_text(),
+    display_workstream(), and the waiting-on-greg-only rule for the
+    needs-you strip.
 
 Run:  python build_greg_dashboard.py
 """
@@ -233,18 +245,19 @@ def is_greg_owner(owner):
     return "greg" in (owner or "").lower()
 
 
-def build_needs_you(tasks):
+def _needs_you_items(tasks):
     items = []
-    seen_ids = set()
     for t in tasks:
         if task_is_sensitive(t):
             continue
-        tid = t.get("ID", "")
         st = (t.get("Status") or "").lower()
         if st == "waiting on greg":
             items.append(t)
-            seen_ids.add(tid)
+    return items
 
+
+def build_needs_you(tasks):
+    items = _needs_you_items(tasks)
     if not items:
         return ""
 
@@ -283,36 +296,65 @@ def build_needs_you(tasks):
 """
 
 
-# ---------------- THE PLAN (workstream overview cards) ----------------
-def build_plan(tasks):
-    by_ws = {}
-    for t in tasks:
-        ws = display_workstream(t.get("Workstream", "Other") or "Other")
-        by_ws.setdefault(ws, []).append(t)
+# ---------------- Kanban board (In progress / Waiting on you / Recently completed) ----------------
+BOARD_COLUMNS = [
+    ("in_progress", "In progress", "#1A8CF0", ("in progress", "ongoing", "blocked")),
+    ("waiting", "Waiting on you", "#d97706", ("waiting on greg",)),
+    ("done", "Recently completed", "#16a34a", ("done",)),
+]
 
-    def most_recent_focus(ts):
-        in_motion = [t for t in ts if (t.get("Status") or "").lower() in ("in progress", "ongoing")
-                     and not task_is_sensitive(t)]
-        if not in_motion:
-            return ""
-        t = in_motion[-1]
-        return clean_client_text(safe(clean(t.get("Task", ""))))
+COLUMN_CAP = 8
 
-    cards = ""
-    for ws, ts in sorted(by_ws.items()):
-        done_n = sum(1 for t in ts if (t.get("Status") or "").lower() == "done")
-        total_n = len(ts)
-        pct = (done_n / total_n * 100) if total_n else 0
-        focus = most_recent_focus(ts)
-        focus_html = f'<div class="plan-focus">{esc(focus)}</div>' if focus else '<div class="plan-focus muted">Steady state -- no active build right now.</div>'
-        cards += (
-            f'<div class="plancard">'
-            f'<div class="plan-name">{esc(ws)}</div>'
-            f'<div class="plan-bar"><div style="width:{pct:.0f}%"></div></div>'
-            f'<div class="plan-count muted">{done_n}/{total_n} done</div>'
-            f'{focus_html}'
-            f'</div>')
-    return f'<div class="plangrid">{cards}</div>'
+
+def _task_note_line(t):
+    """A clean, client-safe one-line note if there's something worth showing."""
+    note = clean_client_text(safe(clean(t.get("Note", ""))))
+    if note:
+        return note
+    desc = clean_client_text(safe(clean(t.get("Description", ""))))
+    return desc
+
+
+def build_board_card(t):
+    title = esc(clean_client_text(safe(clean(t.get("Task", "")))))
+    ws = esc(display_workstream(t.get("Workstream", "Other") or "Other"))
+    note = _task_note_line(t)
+    note_html = f'<div class="task-desc">{esc(note)}</div>' if note else ""
+    return f"""
+<div class="taskcard">
+  <div class="task-title-row"><div class="task-title">{title}</div></div>
+  <div class="tag-row"><span class="tag">{ws}</span></div>
+  {note_html}
+</div>
+"""
+
+
+def build_board(tasks):
+    visible = [t for t in tasks if not task_is_sensitive(t)]
+
+    counts = {}
+    columns_html = ""
+    for key, label, color, statuses in BOARD_COLUMNS:
+        col_tasks = [t for t in visible if (t.get("Status") or "").lower() in statuses]
+        total_n = len(col_tasks)
+        counts[key] = total_n
+        shown = col_tasks[:COLUMN_CAP]
+        cards = "".join(build_board_card(t) for t in shown) or '<p class="col-empty">Nothing here right now.</p>'
+        more_html = ""
+        remaining = total_n - len(shown)
+        if remaining > 0:
+            more_html = f'<p class="col-more muted">+{remaining} more</p>'
+        columns_html += f"""
+    <div class="col">
+      <div class="col-head">
+        <span class="col-dot" style="background:{color}"></span>
+        <span class="col-name">{esc(label).upper()}</span>
+        <span class="col-count">{total_n}</span>
+      </div>
+      <div class="col-body">{cards}{more_html}</div>
+    </div>
+"""
+    return f'<div class="board">{columns_html}</div>', counts
 
 
 # ---------------- CALENDAR ----------------
@@ -365,12 +407,59 @@ def load_calendar_events():
             "title": title,
             "where": where,
         })
+    if not out:
+        return list(KEY_DATES_CURATED), False
     return out, True
+
+
+def upcoming_calendar_events(today=None):
+    """Sorted upcoming/TBD public events -- shared by the sidebar mini-list
+    and the full Calendar view."""
+    today = today or datetime.date.today()
+    events, _ = load_calendar_events()
+
+    def sort_key(e):
+        d = e.get("date")
+        if d is None:
+            return (1, datetime.date.max)
+        return (0, d)
+
+    upcoming = [e for e in events if e.get("tbd") or (e.get("date") and e["date"] >= today)]
+    upcoming.sort(key=sort_key)
+    return upcoming
+
+
+def build_sidebar_key_dates(today=None):
+    """Compact mini-list of the next 3 upcoming public events, for the sidebar."""
+    upcoming = upcoming_calendar_events(today)[:3]
+    if not upcoming:
+        return ""
+
+    rows = ""
+    for e in upcoming:
+        d = e.get("date")
+        if e.get("tbd") or not d:
+            badge = "TBD"
+        else:
+            badge = d.strftime("%b %d")
+        rows += (
+            f'<div class="kd-row">'
+            f'<span class="kd-badge">{esc(badge)}</span>'
+            f'<span class="kd-title">{esc(e.get("title", ""))}</span>'
+            f'</div>')
+
+    return f"""
+    <div class="kd-card">
+      <div class="kd-head">KEY DATES</div>
+      <div class="kd-list">{rows}</div>
+    </div>
+"""
 
 
 def build_calendar(today=None):
     today = today or datetime.date.today()
-    events, from_json = load_calendar_events()
+    upcoming = upcoming_calendar_events(today)
+    events, _ = load_calendar_events()
 
     # Mini-grids: current month + next 2.
     event_days = {}  # (year, month) -> set of day numbers
@@ -417,16 +506,6 @@ def build_calendar(today=None):
         else:
             m += 1
 
-    # Upcoming list: future or TBD events, sorted by date (TBD/no-date last).
-    def sort_key(e):
-        d = e.get("date")
-        if d is None:
-            return (1, datetime.date.max)
-        return (0, d)
-
-    upcoming = [e for e in events if e.get("tbd") or (e.get("date") and e["date"] >= today)]
-    upcoming.sort(key=sort_key)
-
     rows = ""
     for e in upcoming:
         d = e.get("date")
@@ -445,14 +524,14 @@ def build_calendar(today=None):
             f'</div>')
 
     if not rows:
-        rows = '<p class="muted">Nothing scheduled right now.</p>'
+        rows = '<p class="col-empty">Nothing scheduled right now.</p>'
 
     return f"""
-<div class="cal-wrap">
+<div class="cal-body">
   <div class="cal-months">{months_html}</div>
   <div class="cal-upcoming">
-    <div class="cal-upcoming-title">Upcoming</div>
-    <div class="cal-list">{rows}</div>
+    <div class="cal-upcoming-head">Upcoming</div>
+    <div class="cal-upcoming-list">{rows}</div>
   </div>
 </div>
 """
@@ -489,6 +568,45 @@ def build_maps():
     return out
 
 
+# ---------------- shared nav (desktop sidebar list + mobile chip row) ----------------
+def build_nav(extra_class=""):
+    cls = ("nav " + extra_class).strip()
+    return f"""
+    <nav class="{cls}">
+      <a class="navlink" data-view-link="overview" href="#overview"><span class="navicon">\U0001F4CB</span>Overview</a>
+      <a class="navlink" data-view-link="calendar" href="#calendar"><span class="navicon">\U0001F4C5</span>Calendar</a>
+      <a class="navlink" data-view-link="scoreboard" href="#scoreboard"><span class="navicon">\U0001F3AF</span>Scoreboard</a>
+      <a class="navlink" data-view-link="roadmap" href="#roadmap"><span class="navicon">\U0001F5FA</span>Roadmap</a>
+    </nav>
+"""
+
+
+def build_sidebar(pct, key_dates_html):
+    nav = build_nav(extra_class="nav-desktop")
+    progress = f"""
+    <div class="roi-card" id="progress">
+      <div class="roi-label">OVERALL PROGRESS</div>
+      <div class="roi-amount">{pct:.0f}%</div>
+      <div class="roi-bar"><div class="roi-bar-fill" style="width:{pct:.0f}%"></div></div>
+      <div class="roi-sub">prepared by your Chief of Staff department</div>
+    </div>
+"""
+    return f"""
+<aside class="sidebar">
+  <div class="logo-row">
+    <div class="logo-mark">GS</div>
+    <div class="logo-text">
+      <div class="logo-title">The Startup Architect</div>
+      <div class="logo-sub">status dashboard</div>
+    </div>
+  </div>
+  {nav}
+  {progress}
+  {key_dates_html}
+</aside>
+"""
+
+
 # ---------------- page template ----------------
 PAGE = """<!doctype html>
 <html lang="en"><head>
@@ -505,6 +623,7 @@ PAGE = """<!doctype html>
   --muted:#8a8f98;
   --navy:{NAVY};
   --blue:{BLUE};
+  --blue-bg:#e8f2fe;
   --amber:#d97706;
   --amber-bg:#fff7e6;
   --amber-border:#f0c674;
@@ -514,29 +633,69 @@ PAGE = """<!doctype html>
 body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}}
 a{{color:var(--blue);}}
 .muted{{color:var(--muted);font-size:.92em;}}
+.pill{{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:5px 12px;border-radius:999px;}}
+.pill-ontrack{{color:var(--blue);border:1px solid var(--blue);background:#fff;}}
 
 /* Top bar */
 .topbar{{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}}
-.topbar-inner{{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}}
-.tb-wordmark{{font-weight:800;font-size:15px;line-height:1.25;color:var(--navy);}}
-.tb-wordmark .tb-sub{{display:block;font-weight:600;font-size:11px;color:var(--muted);margin-top:2px;}}
-.tb-stats{{display:flex;gap:26px;margin-left:8px;}}
+.topbar-inner{{max-width:1440px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}}
+.tb-wordmark{{font-weight:800;font-size:14.5px;color:var(--navy);white-space:nowrap;}}
+.tb-stats{{display:flex;gap:26px;}}
 .tb-stat{{line-height:1.2;}}
 .tb-num{{font-size:20px;font-weight:800;color:var(--text);}}
 .tb-label{{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}}
+.tb-center{{flex:1;display:flex;justify-content:center;}}
 .tb-right{{margin-left:auto;text-align:right;}}
-.tb-updated{{font-size:12px;color:var(--muted);}}
-.tb-dept{{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;}}
+.tb-updated{{font-size:12px;color:var(--muted);white-space:nowrap;}}
 
-.wrap{{max-width:1180px;margin:0 auto;padding:28px 24px 70px;}}
+/* Layout -- sidebar persists; only the active [data-view] section shows. */
+.layout{{
+  max-width:1440px;margin:0 auto;padding:20px 24px 60px;
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  grid-template-areas:"sidebar center";
+  gap:20px;align-items:start;
+}}
+.layout-sidebar{{grid-area:sidebar;min-width:0;}}
+.layout-center{{grid-area:center;min-width:0;}}
+html.js-ready [data-view]{{display:none;}}
+html.js-ready [data-view].view-active{{display:block;}}
 
-h2{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}}
-.section{{margin-top:40px;}}
-.section:first-child{{margin-top:0;}}
+/* Sidebar */
+.sidebar{{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;position:sticky;top:76px;}}
+.logo-row{{display:flex;align-items:center;gap:10px;margin-bottom:18px;}}
+.logo-mark{{width:34px;height:34px;border-radius:9px;background:var(--blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}}
+.logo-title{{font-weight:800;font-size:13.5px;line-height:1.2;}}
+.logo-sub{{font-size:10.5px;color:var(--muted);}}
+
+.nav{{display:flex;flex-direction:column;gap:2px;margin-bottom:16px;}}
+.navlink{{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;padding:8px 10px;border-radius:8px;}}
+.navlink:hover{{background:#f7f6f3;}}
+.navlink.active{{background:var(--blue-bg);color:var(--blue);}}
+.navicon{{font-size:14px;width:16px;text-align:center;}}
+.nav-mobile{{display:none;}}
+
+.roi-card{{background:var(--blue-bg);border-radius:10px;padding:14px 14px 12px;margin-bottom:18px;}}
+.roi-label{{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;}}
+.roi-amount{{font-size:26px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:8px;}}
+.roi-bar{{height:5px;border-radius:3px;background:#cfe6fb;overflow:hidden;margin-bottom:8px;}}
+.roi-bar-fill{{height:100%;background:var(--blue);border-radius:3px;}}
+.roi-sub{{font-size:10.5px;color:var(--muted);font-style:italic;line-height:1.4;}}
+
+.kd-card{{background:#f7f6f3;border:1px solid var(--border);border-radius:10px;padding:12px 14px;}}
+.kd-head{{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}}
+.kd-list{{display:flex;flex-direction:column;gap:9px;}}
+.kd-row{{display:flex;align-items:flex-start;gap:8px;}}
+.kd-badge{{flex-shrink:0;font-size:9.5px;font-weight:800;color:var(--blue);background:#fff;border-radius:5px;padding:3px 7px;white-space:nowrap;}}
+.kd-title{{font-size:11.5px;color:#3a3f4a;line-height:1.35;}}
+
+/* Center panel */
+.center{{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}}
+h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin:0 0 4px;color:var(--text);}}
 .section-sub{{color:var(--muted);font-size:12.5px;margin:0 0 16px;}}
 
 /* Needs you */
-.needs-section{{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:8px;}}
+.needs-section{{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:16px 18px 18px;margin-bottom:20px;}}
 .needs-head{{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}}
 .needs-flag{{font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--amber);}}
 .needs-sub{{font-size:12px;}}
@@ -546,36 +705,23 @@ h2{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
 .ny-line{{font-size:13px;color:#3a3f4a;line-height:1.5;}}
 .ny-due{{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:8px;}}
 
-/* Plan cards */
-.plangrid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}}
-.plancard{{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}}
-.plan-name{{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:10px;}}
-.plan-bar{{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;}}
-.plan-bar>div{{background:var(--blue);height:100%;border-radius:20px;}}
-.plan-count{{font-size:11.5px;margin-bottom:10px;}}
-.plan-focus{{font-size:12.5px;color:#3a3f4a;line-height:1.4;border-top:1px solid var(--border);padding-top:10px;}}
+/* Kanban board */
+.board{{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:14px;}}
+.col{{background:#faf9f7;border-radius:10px;padding:10px;min-width:0;}}
+.col-head{{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;padding:4px 4px 10px;}}
+.col-dot{{width:7px;height:7px;border-radius:50%;flex-shrink:0;}}
+.col-name{{flex:1;}}
+.col-count{{color:var(--muted);font-weight:700;}}
+.col-body{{display:flex;flex-direction:column;gap:10px;}}
+.col-empty{{padding:6px 4px;font-size:11.5px;color:var(--muted);}}
+.col-more{{padding:2px 4px;font-size:11px;}}
 
-/* Calendar */
-.cal-wrap{{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}}
-.cal-months{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}}
-.cal-month-title{{font-size:11.5px;font-weight:800;color:var(--navy);margin-bottom:8px;text-align:center;}}
-.cal-grid{{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}}
-.cal-dow{{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px;}}
-.cal-day{{position:relative;text-align:center;font-size:10.5px;color:var(--text);padding:4px 0;border-radius:5px;}}
-.cal-day span{{position:relative;z-index:1;}}
-.cal-day.empty{{visibility:hidden;}}
-.cal-day.is-today{{background:var(--navy);color:#fff;font-weight:800;}}
-.cal-day.has-event:not(.is-today){{background:#e8f2fe;font-weight:700;color:var(--blue);}}
-.cal-day.has-event::after{{content:"";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}}
-.cal-day.is-today.has-event::after{{background:#fff;}}
-.cal-upcoming{{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}}
-.cal-upcoming-title{{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}}
-.cal-list{{display:flex;flex-direction:column;gap:12px;}}
-.cal-row{{display:flex;gap:12px;align-items:flex-start;}}
-.cal-badge{{flex-shrink:0;background:#e8f2fe;color:var(--blue);font-weight:800;font-size:11px;border-radius:7px;padding:5px 9px;white-space:nowrap;}}
-.cal-badge-tbd{{background:#f3f2ee;color:var(--muted);}}
-.cal-title{{font-weight:700;font-size:13px;color:var(--navy);}}
-.cal-where{{font-size:12px;margin-top:2px;}}
+.taskcard{{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;}}
+.task-title-row{{margin-bottom:6px;}}
+.task-title{{font-weight:700;font-size:13.5px;line-height:1.3;color:var(--navy);}}
+.task-desc{{font-size:12px;color:#5b606b;line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}}
+.tag-row{{display:flex;flex-wrap:wrap;gap:5px;}}
+.tag{{background:#f3f2ee;color:#5b606b;font-size:10px;border-radius:5px;padding:2px 7px;}}
 
 /* Scoreboard */
 .scoregrid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}}
@@ -585,71 +731,165 @@ h2{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
 .progress{{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;}}
 .progress>div{{background:var(--blue);height:100%;}}
 
-/* Maps */
+/* Calendar */
+.cal-body{{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;}}
+.cal-months{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}}
+.cal-month{{background:#faf9f7;border-radius:10px;padding:10px;}}
+.cal-month-title{{font-size:11.5px;font-weight:800;color:var(--navy);margin-bottom:8px;text-align:center;}}
+.cal-grid{{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}}
+.cal-dow{{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px;}}
+.cal-day{{position:relative;text-align:center;font-size:10.5px;color:var(--text);padding:4px 0;border-radius:5px;}}
+.cal-day span{{position:relative;z-index:1;}}
+.cal-day.empty{{visibility:hidden;}}
+.cal-day.is-today{{background:var(--navy);color:#fff;font-weight:800;}}
+.cal-day.has-event:not(.is-today){{background:var(--blue-bg);font-weight:700;color:var(--blue);}}
+.cal-day.has-event::after{{content:"";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}}
+.cal-day.is-today.has-event::after{{background:#fff;}}
+.cal-upcoming-head{{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}}
+.cal-upcoming-list{{display:flex;flex-direction:column;gap:12px;}}
+.cal-row{{display:flex;gap:12px;align-items:flex-start;}}
+.cal-badge{{flex-shrink:0;background:var(--blue-bg);color:var(--blue);font-weight:800;font-size:11px;border-radius:7px;padding:5px 9px;white-space:nowrap;}}
+.cal-badge-tbd{{background:#f3f2ee;color:var(--muted);}}
+.cal-title{{font-weight:700;font-size:13px;color:var(--navy);}}
+.cal-where{{font-size:12px;margin-top:2px;}}
+
+/* Maps / roadmap */
 .maps{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}}
 .mapcard{{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}}
 .mapcard h3{{margin:0 0 10px;color:var(--navy);font-size:14.5px;}}
 .mapcard img{{width:100%;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:10px;}}
 .mapcard p{{margin:0;line-height:1.5;}}
 
-.foot{{margin-top:56px;color:var(--muted);font-size:11.5px;text-align:center;}}
+.foot{{margin-top:32px;color:var(--muted);font-size:11.5px;text-align:center;}}
 
-@media (max-width:900px){{
-  .cal-wrap{{grid-template-columns:1fr;}}
-  .cal-months{{grid-template-columns:1fr;}}
+@media (max-width:999px){{
+  .layout{{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "center"
+      "sidebar";
+  }}
+  .sidebar{{position:static;}}
+  .cal-body{{grid-template-columns:1fr;}}
+  .board{{grid-template-columns:repeat(2,minmax(0,1fr));}}
 }}
-@media (max-width:640px){{
-  .wrap{{padding:22px 16px 56px;}}
-  .topbar-inner{{padding:14px 16px;}}
-  .tb-right{{margin-left:0;text-align:left;}}
+@media (max-width:767px){{
+  .layout{{padding:12px 12px 60px;gap:16px;}}
+  .topbar-inner{{padding:10px 12px;gap:10px;}}
+  .tb-stats{{gap:16px;}}
+  .tb-num{{font-size:17px;}}
+  .tb-label{{font-size:8.5px;}}
+
+  .nav-desktop{{display:none;}}
+  .nav-mobile{{
+    display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    margin:0;padding:10px 12px;background:var(--panel);
+    border-bottom:1px solid var(--border);
+  }}
+  .nav-mobile .navlink{{flex-shrink:0;padding:8px 12px;background:#f7f6f3;white-space:nowrap;min-height:36px;}}
+  .nav-mobile .navlink.active{{background:var(--blue-bg);color:var(--blue);}}
+
+  .board{{
+    display:flex;
+    grid-template-columns:unset;
+    gap:12px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    margin:0 -4px;
+    padding:0 4px 8px;
+  }}
+  .col{{
+    flex:0 0 85vw;
+    width:85vw;
+    max-height:70vh;
+    overflow-y:auto;
+    scroll-snap-align:start;
+  }}
+  .col-head{{position:sticky;top:0;background:#faf9f7;z-index:1;}}
+
+  .cal-months{{grid-template-columns:1fr;}}
 }}
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="tb-wordmark">Gregory Shepard &mdash; The Startup Architect<span class="tb-sub">Prepared by your Chief of Staff department</span></div>
+    <div class="tb-wordmark">Gregory Shepard &mdash; The Startup Architect</div>
     <div class="tb-stats">
       <div class="tb-stat"><div class="tb-num">{PCT:.0f}%</div><div class="tb-label">Overall progress</div></div>
       <div class="tb-stat"><div class="tb-num">{DONE}/{TOTAL}</div><div class="tb-label">Tasks done</div></div>
       <div class="tb-stat"><div class="tb-num">{WORKSTREAMS}</div><div class="tb-label">Active workstreams</div></div>
     </div>
+    <div class="tb-center"><span class="pill pill-ontrack">ON TRACK</span></div>
     <div class="tb-right">
       <div class="tb-updated">Updated {DATE}</div>
     </div>
   </div>
 </header>
+{NAV_MOBILE}
 
-<div class="wrap">
+<div class="layout">
+  <div class="layout-sidebar">{SIDEBAR}</div>
 
-  {NEEDS_YOU}
+  <section class="center layout-center" id="overview" data-view="overview">
+    <h2 class="view-title">Overview</h2>
+    <p class="section-sub">Every workstream your Chief of Staff department is running, at a glance.</p>
+    {NEEDS_YOU}
+    {BOARD}
+  </section>
 
-  <div class="section">
-    <h2>The Plan</h2>
-    <p class="section-sub">Every workstream your Chief of Staff department is running, with current progress and focus.</p>
-    {PLAN}
-  </div>
-
-  <div class="section">
-    <h2>Calendar</h2>
+  <section class="center layout-center" id="calendar" data-view="calendar">
+    <h2 class="view-title">Calendar</h2>
     <p class="section-sub">What's on the calendar for the launch.</p>
     {CALENDAR}
-  </div>
+  </section>
 
-  <div class="section">
-    <h2>Scoreboard</h2>
+  <section class="center layout-center" id="scoreboard" data-view="scoreboard">
+    <h2 class="view-title">Scoreboard</h2>
     <p class="section-sub">Event funnel numbers so far, next to the goal.</p>
     <div class="scoregrid">{SCOREBOARD}</div>
-  </div>
+  </section>
 
-  <div class="section">
-    <h2>Maps &amp; Big Picture</h2>
+  <section class="center layout-center" id="roadmap" data-view="roadmap">
+    <h2 class="view-title">Roadmap</h2>
     <p class="section-sub">The visual plan.</p>
     <div class="maps">{MAPS}</div>
-  </div>
-
-  <div class="foot">The Startup Architect &middot; status snapshot, updated periodically</div>
+  </section>
 </div>
+
+<div class="foot">Prepared and kept current by your Chief of Staff department.</div>
+
+<script>
+// ---- View router: hash-based nav (sidebar + top bar persist; only the
+// center region swaps). Default view is #overview. No-JS fallback: the CSS
+// only hides non-active [data-view] sections once <html> has the .js-ready
+// class, which this script adds -- if JS never runs, every view just
+// renders stacked. This is the only script on the page: pure client-side
+// hash routing, no fetch, no POST, no external requests.
+(function() {{
+  var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'roadmap'];
+
+  function currentView() {{
+    var h = (location.hash || '').replace('#', '');
+    return VALID_VIEWS.indexOf(h) !== -1 ? h : 'overview';
+  }}
+
+  function showView(view) {{
+    document.querySelectorAll('[data-view]').forEach(function(el) {{
+      el.classList.toggle('view-active', el.getAttribute('data-view') === view);
+    }});
+    document.querySelectorAll('.navlink[data-view-link]').forEach(function(link) {{
+      link.classList.toggle('active', link.getAttribute('data-view-link') === view);
+    }});
+  }}
+
+  document.documentElement.classList.add('js-ready');
+  window.addEventListener('hashchange', function() {{ showView(currentView()); }});
+  showView(currentView());
+}})();
+</script>
 </body></html>
 """
 
@@ -663,15 +903,18 @@ def render():
     workstream_count = len({display_workstream(t.get("Workstream", "Other") or "Other") for t in tasks})
 
     needs_you_html = build_needs_you(tasks)
-    plan_html = build_plan(tasks)
+    board_html, board_counts = build_board(tasks)
     calendar_html = build_calendar()
     scoreboard_html = build_scoreboard(s)
     maps_html = build_maps()
+    key_dates_html = build_sidebar_key_dates()
+    sidebar_html = build_sidebar(pct, key_dates_html)
+    nav_mobile_html = f'<div class="layout-nav-mobile">{build_nav(extra_class="nav-mobile")}</div>'
 
     counts = {
-        "needs_you": len([t for t in tasks if (t.get("Status") or "").lower() == "waiting on greg"
-                          and not task_is_sensitive(t)]),
-        "in_progress": len([t for t in tasks if (t.get("Status") or "").lower() in ("in progress", "ongoing")]),
+        "needs_you": len(_needs_you_items(tasks)),
+        "in_progress": board_counts.get("in_progress", 0),
+        "waiting": board_counts.get("waiting", 0),
         "done": done_n,
         "total": total,
         "workstreams": workstream_count,
@@ -685,8 +928,10 @@ def render():
         TOTAL=total,
         PCT=pct,
         WORKSTREAMS=workstream_count,
+        SIDEBAR=sidebar_html,
+        NAV_MOBILE=nav_mobile_html,
         NEEDS_YOU=needs_you_html,
-        PLAN=plan_html,
+        BOARD=board_html,
         CALENDAR=calendar_html,
         SCOREBOARD=scoreboard_html,
         MAPS=maps_html,
@@ -712,6 +957,7 @@ def main():
     print("Build complete.")
     print(f"  Needs you, Greg: {counts['needs_you']}")
     print(f"  In progress:     {counts['in_progress']}")
+    print(f"  Waiting on you:  {counts['waiting']}")
     print(f"  Done:            {counts['done']}")
     print(f"  Total tasks:     {counts['total']}")
     print(f"  Workstreams:     {counts['workstreams']}")
