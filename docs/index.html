@@ -183,6 +183,31 @@ ul.col-hidden.is-expanded{display:block;}
 .progress{background:#eeece6;border-radius:20px;height:8px;overflow:hidden;}
 .progress>div{background:var(--blue);height:100%;}
 
+/* Plans */
+.plan-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;}
+.plan-name{margin:0 0 4px;font-size:17px;color:var(--navy);}
+.plan-goal{font-size:13.5px;font-weight:700;color:var(--blue);margin-bottom:6px;}
+.plan-summary{margin:0 0 12px;line-height:1.5;}
+.doc-list{display:flex;flex-direction:column;}
+.doc-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--border);}
+.doc-main{flex:1;min-width:0;}
+.doc-title{font-size:13.5px;font-weight:700;color:var(--navy);}
+.doc-title a{color:var(--blue);text-decoration:none;}
+.doc-title a:hover{text-decoration:underline;}
+.doc-note{font-size:12px;color:#5b606b;margin-top:2px;}
+.doc-status{font-size:9.5px;font-weight:800;letter-spacing:.4px;border-radius:999px;padding:4px 10px;white-space:nowrap;}
+.doc-received{color:#5b606b;background:#f3f2ee;}
+.doc-review{color:var(--blue);background:var(--blue-bg);}
+.doc-actioned{color:var(--green);background:#e9f6ec;}
+.doc-blocked{color:var(--amber);background:var(--amber-bg);}
+.gate{margin-top:14px;background:#faf9f7;border-radius:10px;padding:12px 14px;}
+.gate-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;}
+.gate-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.gate-item{font-size:13px;color:#3a3f4a;display:flex;gap:8px;align-items:baseline;}
+.gate-item.gate-done{color:var(--muted);text-decoration:line-through;}
+.gate-mark{color:var(--blue);font-weight:800;flex:none;}
+.gate-done .gate-mark{color:var(--green);}
+
 /* Calendar */
 .cal-body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;}
 .cal-months{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
@@ -342,6 +367,7 @@ ul.col-hidden.is-expanded{display:block;}
       <a class="navlink" data-view-link="overview" href="#overview"><span class="navicon">📋</span>Overview</a>
       <a class="navlink" data-view-link="calendar" href="#calendar"><span class="navicon">📅</span>Calendar</a>
       <a class="navlink" data-view-link="scoreboard" href="#scoreboard"><span class="navicon">🎯</span>Scoreboard</a>
+      <a class="navlink" data-view-link="plans" href="#plans"><span class="navicon">📚</span>Plans</a>
       <a class="navlink" data-view-link="roadmap" href="#roadmap"><span class="navicon">🗺</span>Roadmap</a>
     </nav>
 </div>
@@ -361,6 +387,7 @@ ul.col-hidden.is-expanded{display:block;}
       <a class="navlink" data-view-link="overview" href="#overview"><span class="navicon">📋</span>Overview</a>
       <a class="navlink" data-view-link="calendar" href="#calendar"><span class="navicon">📅</span>Calendar</a>
       <a class="navlink" data-view-link="scoreboard" href="#scoreboard"><span class="navicon">🎯</span>Scoreboard</a>
+      <a class="navlink" data-view-link="plans" href="#plans"><span class="navicon">📚</span>Plans</a>
       <a class="navlink" data-view-link="roadmap" href="#roadmap"><span class="navicon">🗺</span>Roadmap</a>
     </nav>
 
@@ -392,9 +419,9 @@ ul.col-hidden.is-expanded{display:block;}
   </div>
   <div class="tw-grid">
     <div class="tw-card">
-      <div class="tw-num">9</div>
+      <div class="tw-num">18</div>
       <div class="tw-label">Tasks completed</div>
-      <ul class="tw-list"><li>Add 4 video candidates to the eSpeakers profile</li><li>Reply to Lisa Shepard&#x27;s introduction</li><li>Rebuild the Startup Science sponsorship prospects list</li><li>Draft eSpeakers calendar entry for the UN Sept 21-22 lead</li><li>Confirm Monday Jul 6 2 PM Pacific meeting with Greg</li></ul><ul class="tw-list col-hidden" data-hidden-cards><li>Follow up Doug Means meetup co-host outreach</li><li>Find EO Louisiana direct chapter contact email</li><li>Follow up with Shamelle for the event attendance log</li><li>Weekly Startup Grind tracker refresh</li></ul><button type="button" class="show-all-btn" data-show-all data-show-label="Show all 4 &#9662;" data-hide-label="Show fewer &#9652;">Show all 4 &#9662;</button>
+      <ul class="tw-list"><li>Running-total as a marketing hook</li><li>Brand cross-contamination risk</li><li>Campaign may already be closed</li><li>Co-owner language is legally risky</li><li>Restating specific terms externally</li></ul><ul class="tw-list col-hidden" data-hidden-cards><li>Runway already gone</li><li>Blockers vs. done-definition conflict</li><li>&quot;Registration&quot; is undefined</li><li>Compile Greg&#x27;s outstanding action items from the Jun 29 call recap</li><li>Add 4 video candidates to the eSpeakers profile</li><li>Reply to Lisa Shepard&#x27;s introduction</li><li>Rebuild the Startup Science sponsorship prospects list</li><li>Draft eSpeakers calendar entry for the UN Sept 21-22 lead</li><li>Confirm Monday Jul 6 2 PM Pacific meeting with Greg</li><li>Follow up Doug Means meetup co-host outreach</li><li>Find EO Louisiana direct chapter contact email</li><li>Follow up with Shamelle for the event attendance log</li><li>Weekly Startup Grind tracker refresh</li></ul><button type="button" class="show-all-btn" data-show-all data-show-label="Show all 13 &#9662;" data-hide-label="Show fewer &#9652;">Show all 13 &#9662;</button>
     </div>
     <div class="tw-card">
       <div class="tw-num">0</div>
@@ -422,7 +449,7 @@ ul.col-hidden.is-expanded{display:block;}
       <div class="col-head">
         <span class="col-dot" style="background:#1A8CF0"></span>
         <span class="col-name">IN PROGRESS</span>
-        <span class="col-count">12</span>
+        <span class="col-count">16</span>
       </div>
       <div class="col-body">
 <div class="taskcard" data-task-detail="tr_t6" tabindex="0" role="button">
@@ -473,6 +500,14 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
+<div class="taskcard" data-task-detail="mc_t_008" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">PodMatch outreach batch in Greg&#x27;s voice</div></div>
+  <div class="tag-row"><span class="tag">Outreach</span></div>
+  <div class="task-desc">Blocked on PodMatch session auth; retry during next active window.</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
 <div class="taskcard" data-task-detail="mc_t_009" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Unblock Eventbrite payout for the August event</div></div>
   <div class="tag-row"><span class="tag">Events</span></div>
@@ -480,22 +515,14 @@ ul.col-hidden.is-expanded{display:block;}
   
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
-
-<div class="taskcard" data-task-detail="mc_t_019" tabindex="0" role="button">
-  <div class="task-title-row"><div class="task-title">Draft the WeFunder campaign marketing plan</div></div>
-  <div class="tag-row"><span class="tag">Content</span></div>
-  <div class="task-desc">Develop a formal strategy to improve the WeFunder investment campaign and present suggestions to Gregory.</div>
-  
-  <div class="task-details-hint">details &rsaquo;</div>
-</div>
-<p class="col-more muted">+4 more</p></div>
+<p class="col-more muted">+8 more</p></div>
     </div>
 
     <div class="col">
       <div class="col-head">
         <span class="col-dot" style="background:#d97706"></span>
         <span class="col-name">WAITING ON YOU</span>
-        <span class="col-count">10</span>
+        <span class="col-count">16</span>
       </div>
       <div class="col-body">
 <div class="taskcard" data-task-detail="tr_t3" tabindex="0" role="button">
@@ -510,14 +537,6 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-title-row"><div class="task-title">Get Greg&#x27;s travel calendar</div></div>
   <div class="tag-row"><span class="tag">Ops</span></div>
   <div class="task-desc">Greg will send his travel calendar; use it to schedule events and asks around his availability.</div>
-  
-  <div class="task-details-hint">details &rsaquo;</div>
-</div>
-
-<div class="taskcard" data-task-detail="mc_t_008" tabindex="0" role="button">
-  <div class="task-title-row"><div class="task-title">PodMatch outreach batch in Greg&#x27;s voice</div></div>
-  <div class="tag-row"><span class="tag">Outreach</span></div>
-  <div class="task-desc">Blocked on PodMatch session auth; retry during next active window.</div>
   
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
@@ -546,6 +565,14 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
+<div class="taskcard" data-task-detail="mc_t_019" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Draft the WeFunder campaign marketing plan</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">Develop a formal strategy to improve the WeFunder investment campaign and present suggestions to Gregory.</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
 <div class="taskcard" data-task-detail="mc_t_028" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Resolve Jul 14 Speaker Initial Call vs travel conflict</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
@@ -554,21 +581,21 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard" data-task-detail="mc_t_031" tabindex="0" role="button">
-  <div class="task-title-row"><div class="task-title">Respond to the eSpeakers quote request</div></div>
+<div class="taskcard" data-task-detail="mc_t_030" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Respond to AI Summit interview invitation</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
-  <div class="task-desc">An event organizer requested a quote from Gregory through eSpeakers. Price per the regional pricing guide and respond.</div>
+  <div class="task-desc">Pamela Dunn (aisummitspeakers.com) asked if Greg is still interested and wants a call booked via their link. Check compensation and format against the speaking pricing guide before committing.</div>
   
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
-<p class="col-more muted">+2 more</p></div>
+<p class="col-more muted">+8 more</p></div>
     </div>
 
     <div class="col">
       <div class="col-head">
         <span class="col-dot" style="background:#16a34a"></span>
         <span class="col-name">RECENTLY COMPLETED</span>
-        <span class="col-count">15</span>
+        <span class="col-count">24</span>
       </div>
       <div class="col-body">
 <div class="taskcard" data-task-detail="tr_t27" tabindex="0" role="button">
@@ -619,7 +646,79 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard" data-task-detail="mc_t_007" tabindex="0" role="button">
+<div class="taskcard" data-task-detail="mc_t_083" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Running-total as a marketing hook</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">Week 3 leads with live dollars raised (e.g. 300K in week 1) -- momentum claims can be misleading if stale or if the raise stalls, and need the live figure plus the standard disclaimer every time. found by Fable spec-review of D-004</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard" data-task-detail="mc_t_084" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Brand cross-contamination risk</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">Folding Gregory&#x27;s raise into Rheanne&#x27;s SEEN Letter mixes two brands&#x27; audiences and voices, which the workspace rules explicitly forbid; the newsletter play needs to run on a Gregory/StartupScience list, not Rheanne&#x27;s. found by Fable spec-review of D-004</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+<div class="col-hidden" data-hidden-cards>
+<div class="taskcard card-hidden" data-task-detail="mc_t_077" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Campaign may already be closed</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">Opened Feb 3 with ~April close; it is now July 6, so the entire live-campaign plan may be moot, yet the plan proceeds as if open and only queries this as open-question #1/#4 rather than as a blocking gate. found by Fable spec-review of D-004</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_078" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Co-owner language is legally risky</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">SAFEs are a right to future equity, not current ownership, so calling investors co-owners in Reg CF outreach is a misleading-claim exposure and contradicts the compliance section&#x27;s own spirit. found by Fable spec-review of D-004</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_082" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Restating specific terms externally</div></div>
+  <div class="tag-row"><span class="tag">Content</span></div>
+  <div class="task-desc">The plan cites 1,645,000 dollar goal, 20.95M dollar cap, and tiers; guardrail #1 says never restate terms externally, but the plan doesn&#x27;t mark which numbers are internal-only vs. permitted in a limited Rule 204 notice. found by Fable spec-review of D-004</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_060" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Runway already gone</div></div>
+  <div class="tag-row"><span class="tag">Events</span></div>
+  <div class="task-desc">Today is Jul 6 and &quot;Week 1&quot; is early-mid July, so the 4-week countback to Aug 8 has effectively started while the plan is still a DRAFT gated behind two open blockers, leaving little or no real promotion window. found by Fable spec-review of D-005</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_061" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Blockers vs. done-definition conflict</div></div>
+  <div class="tag-row"><span class="tag">Events</span></div>
+  <div class="task-desc">The task goal requires &quot;first week of promotion executed,&quot; but the spec forbids any dated/linked external promotion until T-001 and T-009 clear, so the deliverable can be &quot;done&quot; only by executing nothing or by slipping the date. found by Fable spec-review of D-005</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_063" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">&quot;Registration&quot; is undefined</div></div>
+  <div class="tag-row"><span class="tag">Events</span></div>
+  <div class="task-desc">A free LinkedIn RSVP, a $10 paid Eventbrite ticket, and a landing-page email capture are three different things counted against the same &quot;45&quot; target, making the metric meaningless and non-comparable across the interim/Eventbrite switch. found by Fable spec-review of D-005</div>
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_055" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Compile Greg&#x27;s outstanding action items from the Jun 29 call recap</div></div>
+  <div class="tag-row"><span class="tag">Speaking</span></div>
+  
+  
+  <div class="task-details-hint">details &rsaquo;</div>
+</div>
+
+<div class="taskcard card-hidden" data-task-detail="mc_t_007" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Add 4 video candidates to the eSpeakers profile</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
   <div class="task-desc">4 unused video candidates were found on Gregory&#x27;s YouTube channel; embed them on the eSpeakers profile.</div>
@@ -627,14 +726,14 @@ ul.col-hidden.is-expanded{display:block;}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard" data-task-detail="mc_t_029" tabindex="0" role="button">
+<div class="taskcard card-hidden" data-task-detail="mc_t_029" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Reply to Lisa Shepard&#x27;s introduction</div></div>
   <div class="tag-row"><span class="tag">Outreach</span></div>
   <div class="task-desc">Lisa (Greg&#x27;s wife) introduced herself as the go-to for Greg&#x27;s schedule and shared his Jul 7-14 travel dates. Warm reply drafted to outbox; save her as the scheduling contact.</div>
   
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
-<div class="col-hidden" data-hidden-cards>
+
 <div class="taskcard card-hidden" data-task-detail="mc_t_020" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Rebuild the Startup Science sponsorship prospects list</div></div>
   <div class="tag-row"><span class="tag">Events</span></div>
@@ -690,7 +789,7 @@ ul.col-hidden.is-expanded{display:block;}
   
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
-</div><button type="button" class="show-all-btn" data-show-all data-show-label="Show all 7 &#9662;" data-hide-label="Show fewer &#9652;">Show all 7 &#9662;</button></div>
+</div><button type="button" class="show-all-btn" data-show-all data-show-label="Show all 16 &#9662;" data-hide-label="Show fewer &#9652;">Show all 16 &#9662;</button></div>
     </div>
 </div>
   </section>
@@ -716,6 +815,12 @@ ul.col-hidden.is-expanded{display:block;}
     <div class="scoregrid"><div class="score"><div class="score-label">Masterclass registrations</div><div class="score-num">0 <span class="muted">/ 45</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Two-day seats sold</div><div class="score-num">0 <span class="muted">/ 10</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Sponsors closed</div><div class="score-num">0 <span class="muted">/ 3</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Speaking pipeline value ($)</div><div class="score-num">0 <span class="muted">/ 25000</span></div><div class="progress"><div style="width:0%"></div></div></div><div class="score"><div class="score-label">Newsletter subscribers</div><div class="score-num">3800 <span class="muted">/ 5000</span></div><div class="progress"><div style="width:76%"></div></div></div></div>
   </section>
 
+  <section class="center layout-center" id="plans" data-view="plans">
+    <h2 class="view-title">Plans</h2>
+    <p class="section-sub">The operating plans in motion: every support document tracked, and each plan's published gate.</p>
+    <div class="plan-card"><h3 class="plan-name">The $50K Plan (The Startup Architect)</h3><div class="plan-goal">$50,000/month by June 2027, with the $25,000 milestone gated in December 2026</div><p class="plan-summary muted">Twelve gated months on the lecture &gt; 2-Day Intensive &gt; Institute engine, plus sponsors, speaking, books, merch, and music. July is the build-out month.</p><div class="doc-list"><div class="doc-row"><div class="doc-main"><div class="doc-title"><a href="https://drive.google.com/file/d/1IvELO5hhGHNAFqOBmb85clAc0YdTo_Jh/view" target="_blank" rel="noopener">The $50K Plan v3 (master plan, Word)</a></div><div class="doc-note">Read in full Jul 6; July page translated into action items</div></div><span class="doc-status doc-review">IN REVIEW</span></div><div class="doc-row"><div class="doc-main"><div class="doc-title"><a href="https://drive.google.com/file/d/1lCC6bLcyHThmTsNgNIaCj20mema7utEG/view" target="_blank" rel="noopener">Master To-Do (57 dated tasks, Excel)</a></div><div class="doc-note">July items filed onto the operations board Jul 6</div></div><span class="doc-status doc-actioned">ACTIONED</span></div><div class="doc-row"><div class="doc-main"><div class="doc-title"><a href="https://drive.google.com/file/d/1dUA3-ouprmcLAagy3LhgqkPc3Y9t1eYj/view" target="_blank" rel="noopener">Performance Sheet (KPI scoreboard, Excel)</a></div><div class="doc-note">First actuals due last business day of July</div></div><span class="doc-status doc-received">RECEIVED</span></div></div><div class="gate"><div class="gate-title">July gate, checked Jul 31</div><ul class="gate-list"><li class="gate-item "><span class="gate-mark">&#9675;</span>Email newsletter live (due Jul 10)</li><li class="gate-item "><span class="gate-mark">&#9675;</span>2-Day Intensive #1 delivered at 8+ seats (Jul 26)</li><li class="gate-item "><span class="gate-mark">&#9675;</span>80% of the build-out board cleared</li></ul></div></div><div class="plan-card"><h3 class="plan-name">StartupScience Marketing &amp; Sales Plan</h3><div class="plan-goal">25 booked demos/month by December; new website live September 1</div><p class="plan-summary muted">Six months of channel-gated demand generation: ESO program management first, every demo traced to its channel, checkpoints pre-decided.</p><div class="doc-list"><div class="doc-row"><div class="doc-main"><div class="doc-title"><a href="https://drive.google.com/drive/folders/1eJCFdD2rSZDGUc4aYsYMUg0Sx66mNO9J" target="_blank" rel="noopener">The Demand Plan (Word)</a></div><div class="doc-note">Drive folder not shared with the operations account yet; access requested Jul 6</div></div><span class="doc-status doc-blocked">WAITING ON ACCESS</span></div><div class="doc-row"><div class="doc-main"><div class="doc-title"><a href="https://drive.google.com/drive/folders/1eJCFdD2rSZDGUc4aYsYMUg0Sx66mNO9J" target="_blank" rel="noopener">KPI Sheet (Excel)</a></div><div class="doc-note">Same folder; summarized from the handoff email meanwhile</div></div><span class="doc-status doc-blocked">WAITING ON ACCESS</span></div></div><div class="gate"><div class="gate-title">July gates</div><ul class="gate-list"><li class="gate-item "><span class="gate-mark">&#9675;</span>Email domains bought, warm-up started (gates August sends)</li><li class="gate-item "><span class="gate-mark">&#9675;</span>HubSpot source tracking closed (gates all paid spend)</li><li class="gate-item "><span class="gate-mark">&#9675;</span>Website: builder decision + sitemap delivered</li></ul></div></div>
+  </section>
+
   <section class="center layout-center" id="roadmap" data-view="roadmap">
     <h2 class="view-title">Roadmap</h2>
     <p class="section-sub">The visual plan.</p>
@@ -725,7 +830,7 @@ ul.col-hidden.is-expanded{display:block;}
 
 <div class="foot">Prepared and kept current by your Chief of Staff department.</div>
 
-<script type="application/json" id="task-data">{"tr_t6": {"title": "Build website registration page", "status_label": "In progress", "workstream": "Website", "description": "The landing page all traffic points to", "goal": "", "date": "Jul 01, 2026", "proof": []}, "tr_t7": {"title": "Create QR code to the 2-Day", "status_label": "In progress", "workstream": "Launch", "description": "Hovercode QR linking lecture to 2-Day", "goal": "", "date": "Jun 27, 2026", "proof": []}, "tr_t8": {"title": "Cross-platform positioning rollout", "status_label": "In progress", "workstream": "Brand", "description": "Set brand on Substack, X, IG, FB, YT, TikTok, LI company/newsletter", "goal": "", "date": "Jul 05, 2026", "proof": []}, "tr_t21": {"title": "Daily content engine", "status_label": "In progress", "workstream": "Content", "description": "Recurring: LinkedIn post/engage/outreach + repurpose 1 piece", "goal": "", "date": "daily", "proof": []}, "mc_t_001": {"title": "Confirm masterclass date at The Bornemann Theatre", "status_label": "In progress", "workstream": "Events", "description": "Venue is booked pending final date. Greg needs to pick an early-August date so the registration page and promotion can go live.", "goal": "Date locked with the venue and reflected on the event registration page", "date": "Jul 06, 2026", "proof": []}, "mc_t_003": {"title": "Repurpose 3 unpublished website articles into newsletter drafts", "status_label": "In progress", "workstream": "Newsletter", "description": "Pull from the 40+ unpublished website articles and adapt 3 into newsletter-ready drafts matching Gregory's voice.", "goal": "3 newsletter drafts saved for review, matching Gregory voice", "date": "Jul 05, 2026", "proof": []}, "mc_t_009": {"title": "Unblock Eventbrite payout for the August event", "status_label": "In progress", "workstream": "Events", "description": "Greg must add his payout details in Eventbrite; until then every ticket sale for the August event is uncollectable revenue. Highest leverage, lowest effort.", "goal": "Eventbrite shows a valid connected payout method for the event", "date": "Jul 06, 2026", "proof": []}, "mc_t_019": {"title": "Draft the WeFunder campaign marketing plan", "status_label": "In progress", "workstream": "Content", "description": "Develop a formal strategy to improve the WeFunder investment campaign and present suggestions to Gregory.", "goal": "A written marketing-plan draft exists and has been presented to Gregory", "date": "Jul 06, 2026", "proof": []}, "tr_t3": {"title": "Greg unblocks access", "status_label": "Waiting on you", "workstream": "Setup", "description": "", "goal": "", "date": "Jun 24, 2026", "proof": []}, "tr_t30": {"title": "Get Greg's travel calendar", "status_label": "Waiting on you", "workstream": "Ops", "description": "Greg will send his travel calendar; use it to schedule events and asks around his availability.", "goal": "", "date": "Jun 25, 2026", "proof": []}, "mc_t_008": {"title": "PodMatch outreach batch in Greg's voice", "status_label": "Waiting on you", "workstream": "Outreach", "description": "Blocked on PodMatch session auth; retry during next active window.", "goal": "5 personalized pitches sent via PodMatch", "date": "Jul 06, 2026", "proof": []}, "mc_t_011": {"title": "Get Greg's decision on paid-speaking HOLDs", "status_label": "Waiting on you", "workstream": "Speaking", "description": "TIGER 21 and TEC Canada are on hold pending Greg's confirmation of compensation terms before submitting or calling the organizer.", "goal": "Both leads moved to submitted or declined based on Greg's call", "date": "Jul 05, 2026", "proof": []}, "mc_t_013": {"title": "Confirm 4th WeFunder company name for the website", "status_label": "Waiting on you", "workstream": "Website", "description": "The ventures-investments page is incomplete pending Greg naming the fourth active WeFunder-backed company.", "goal": "ventures-investments.html lists four confirmed company names with no placeholder", "date": "Jul 05, 2026", "proof": []}, "mc_t_014": {"title": "Resolve Book 101 Review scheduling question", "status_label": "Waiting on you", "workstream": "Outreach", "description": "Podcast guest invite needs Greg's input on whether it is the same show as the April 15 recording; a scheduling reply is still open.", "goal": "Book 101 Review is scheduled on the calendar or explicitly declined", "date": "Jul 05, 2026", "proof": []}, "mc_t_028": {"title": "Resolve Jul 14 Speaker Initial Call vs travel conflict", "status_label": "Waiting on you", "workstream": "Speaking", "description": "Laptop Lifestyle booked Greg for a Speaker Initial Call Tue Jul 14 8 AM PT, but Greg is away Jul 7-14. Confirm whether he can take it or it must move.", "goal": "Call either confirmed as workable or rescheduled with the organizer", "date": "Jul 05, 2026", "proof": []}, "mc_t_031": {"title": "Respond to the eSpeakers quote request", "status_label": "Waiting on you", "workstream": "Speaking", "description": "An event organizer requested a quote from Gregory through eSpeakers. Price per the regional pricing guide and respond.", "goal": "Quote submitted in eSpeakers per the pricing guide", "date": "Jul 06, 2026", "proof": []}, "tr_t27": {"title": "Stand up the master calendar", "status_label": "Recently completed", "workstream": "Systems", "description": "Every event + its promo countdown, plus the per-channel publishing calendar (Operational Plan, Days 1-14).", "goal": "", "date": "Jun 30, 2026", "proof": []}, "tr_t31": {"title": "Put Greg's brand kit in the Drive", "status_label": "Recently completed", "workstream": "Brand", "description": "Add Greg brand kit (colours, fonts, logo, assets) to the shared Drive so everything pulls from one source.", "goal": "", "date": "Jun 27, 2026", "proof": []}, "tr_t2": {"title": "Confirm ticket pricing", "status_label": "Recently completed", "workstream": "Launch", "description": "Resolve tiered ($395.99/495.99/595.99) vs flat $495.99", "goal": "", "date": "Jun 24, 2026", "proof": []}, "tr_t32": {"title": "Set up recurring meetings (Mon + Fri)", "status_label": "Recently completed", "workstream": "Ops", "description": "Create the recurring 'Gregory & Rheanne alignment' meeting Mon 8:00-8:30 (Greg's time) and a Fri 8:00 check-in, same format.", "goal": "", "date": "Jun 23, 2026", "proof": []}, "tr_t22": {"title": "Review the Master Manual", "status_label": "Recently completed", "workstream": "Program", "description": "Read Greg's Master Manual end to end (To-Do List #1).", "goal": "", "date": "Jul 04, 2026", "proof": []}, "tr_t34": {"title": "Optimize the E-speakers profile", "status_label": "Recently completed", "workstream": "Growth", "description": "DONE Jul 6. Speaker profile score raised from 88 to 90 out of 100. Video library grown from 3 to 7 real clips, calendar refreshed with travel and UN holds, and pending review verifications resent. Last step to a perfect score is more client reviews, request emails are drafted and awaiting approval.", "goal": "", "date": "Jul 11, 2026", "proof": []}, "mc_t_007": {"title": "Add 4 video candidates to the eSpeakers profile", "status_label": "Recently completed", "workstream": "Speaking", "description": "4 unused video candidates were found on Gregory's YouTube channel; embed them on the eSpeakers profile.", "goal": "4 videos embedded on the profile", "date": "Jul 06, 2026", "proof": []}, "mc_t_029": {"title": "Reply to Lisa Shepard's introduction", "status_label": "Recently completed", "workstream": "Outreach", "description": "Lisa (Greg's wife) introduced herself as the go-to for Greg's schedule and shared his Jul 7-14 travel dates. Warm reply drafted to outbox; save her as the scheduling contact.", "goal": "Reply sent and Lisa recorded as the scheduling contact", "date": "Jul 06, 2026", "proof": []}, "mc_t_020": {"title": "Rebuild the Startup Science sponsorship prospects list", "status_label": "Recently completed", "workstream": "Events", "description": "The sponsorship pipeline stalled on a missing prospects file; locate or rebuild the list so the pipeline has a clear next action.", "goal": "Prospects list located or rebuilt with a clear next action noted", "date": "Jul 06, 2026", "proof": []}, "mc_t_002": {"title": "Draft eSpeakers calendar entry for the UN Sept 21-22 lead", "status_label": "Recently completed", "workstream": "Speaking", "description": "New real lead for the UN engagement on Sept 21-22. Needs a calendar entry drafted so it can be pasted into eSpeakers.", "goal": "Calendar entry drafted and ready to paste into eSpeakers", "date": "Jul 06, 2026", "proof": []}, "mc_t_026": {"title": "Confirm Monday Jul 6 2 PM Pacific meeting with Greg", "status_label": "Recently completed", "workstream": "Events", "description": "Greg asked for a full hour Monday 2 PM Pacific with the team included. Agenda: marketing update, meet Gerardo, account transition, takeover plan. Confirmation email drafted to outbox.", "goal": "Greg confirms and the team has the invite", "date": "Jul 06, 2026", "proof": []}, "mc_t_004": {"title": "Follow up Doug Means meetup co-host outreach", "status_label": "Recently completed", "workstream": "Outreach", "description": "Doug Means (5,644 members) is still an open co-host lead. Send a follow-up and log any reply.", "goal": "Follow-up message sent and reply logged", "date": "Jul 06, 2026", "proof": []}, "mc_t_016": {"title": "Find EO Louisiana direct chapter contact email", "status_label": "Recently completed", "workstream": "Speaking", "description": "Outreach research flagged EO Louisiana as missing a direct contact method before a speaking submission can go out.", "goal": "A verified direct contact email for EO Louisiana exists in the tracker", "date": "Jul 06, 2026", "proof": []}, "mc_t_017": {"title": "Follow up with Shamelle for the event attendance log", "status_label": "Recently completed", "workstream": "Events", "description": "The last Startup Grind event's attendee info was not collected at the door; Shamelle agreed to retrieve a log. Follow up so it does not slip.", "goal": "Attendee list retrieved or confirmed unrecoverable", "date": "Jul 05, 2026", "proof": []}, "mc_t_005": {"title": "Weekly Startup Grind tracker refresh", "status_label": "Recently completed", "workstream": "Events", "description": "Recurring Monday-review/Friday-report cadence for the Startup Grind event-improvement tracker.", "goal": "Tracker rows updated and Friday report drafted", "date": "Jul 05, 2026", "proof": []}}</script>
+<script type="application/json" id="task-data">{"tr_t6": {"title": "Build website registration page", "status_label": "In progress", "workstream": "Website", "description": "The landing page all traffic points to", "goal": "", "date": "Jul 01, 2026", "proof": []}, "tr_t7": {"title": "Create QR code to the 2-Day", "status_label": "In progress", "workstream": "Launch", "description": "Hovercode QR linking lecture to 2-Day", "goal": "", "date": "Jun 27, 2026", "proof": []}, "tr_t8": {"title": "Cross-platform positioning rollout", "status_label": "In progress", "workstream": "Brand", "description": "Set brand on Substack, X, IG, FB, YT, TikTok, LI company/newsletter", "goal": "", "date": "Jul 05, 2026", "proof": []}, "tr_t21": {"title": "Daily content engine", "status_label": "In progress", "workstream": "Content", "description": "Recurring: LinkedIn post/engage/outreach + repurpose 1 piece", "goal": "", "date": "daily", "proof": []}, "mc_t_001": {"title": "Confirm masterclass date at The Bornemann Theatre", "status_label": "In progress", "workstream": "Events", "description": "Venue is booked pending final date. Greg needs to pick an early-August date so the registration page and promotion can go live.", "goal": "Date locked with the venue and reflected on the event registration page", "date": "Jul 06, 2026", "proof": []}, "mc_t_003": {"title": "Repurpose 3 unpublished website articles into newsletter drafts", "status_label": "In progress", "workstream": "Newsletter", "description": "Pull from the 40+ unpublished website articles and adapt 3 into newsletter-ready drafts matching Gregory's voice.", "goal": "3 newsletter drafts saved for review, matching Gregory voice", "date": "Jul 05, 2026", "proof": []}, "mc_t_008": {"title": "PodMatch outreach batch in Greg's voice", "status_label": "In progress", "workstream": "Outreach", "description": "Blocked on PodMatch session auth; retry during next active window.", "goal": "5 personalized pitches sent via PodMatch", "date": "Jul 06, 2026", "proof": []}, "mc_t_009": {"title": "Unblock Eventbrite payout for the August event", "status_label": "In progress", "workstream": "Events", "description": "Greg must add his payout details in Eventbrite; until then every ticket sale for the August event is uncollectable revenue. Highest leverage, lowest effort.", "goal": "Eventbrite shows a valid connected payout method for the event", "date": "Jul 06, 2026", "proof": []}, "tr_t3": {"title": "Greg unblocks access", "status_label": "Waiting on you", "workstream": "Setup", "description": "", "goal": "", "date": "Jun 24, 2026", "proof": []}, "tr_t30": {"title": "Get Greg's travel calendar", "status_label": "Waiting on you", "workstream": "Ops", "description": "Greg will send his travel calendar; use it to schedule events and asks around his availability.", "goal": "", "date": "Jun 25, 2026", "proof": []}, "mc_t_011": {"title": "Get Greg's decision on paid-speaking HOLDs", "status_label": "Waiting on you", "workstream": "Speaking", "description": "TIGER 21 and TEC Canada are on hold pending Greg's confirmation of compensation terms before submitting or calling the organizer.", "goal": "Both leads moved to submitted or declined based on Greg's call", "date": "Jul 05, 2026", "proof": []}, "mc_t_013": {"title": "Confirm 4th WeFunder company name for the website", "status_label": "Waiting on you", "workstream": "Website", "description": "The ventures-investments page is incomplete pending Greg naming the fourth active WeFunder-backed company.", "goal": "ventures-investments.html lists four confirmed company names with no placeholder", "date": "Jul 05, 2026", "proof": []}, "mc_t_014": {"title": "Resolve Book 101 Review scheduling question", "status_label": "Waiting on you", "workstream": "Outreach", "description": "Podcast guest invite needs Greg's input on whether it is the same show as the April 15 recording; a scheduling reply is still open.", "goal": "Book 101 Review is scheduled on the calendar or explicitly declined", "date": "Jul 05, 2026", "proof": []}, "mc_t_019": {"title": "Draft the WeFunder campaign marketing plan", "status_label": "Waiting on you", "workstream": "Content", "description": "Develop a formal strategy to improve the WeFunder investment campaign and present suggestions to Gregory.", "goal": "A written marketing-plan draft exists and has been presented to Gregory", "date": "Jul 06, 2026", "proof": []}, "mc_t_028": {"title": "Resolve Jul 14 Speaker Initial Call vs travel conflict", "status_label": "Waiting on you", "workstream": "Speaking", "description": "Laptop Lifestyle booked Greg for a Speaker Initial Call Tue Jul 14 8 AM PT, but Greg is away Jul 7-14. Confirm whether he can take it or it must move.", "goal": "Call either confirmed as workable or rescheduled with the organizer", "date": "Jul 05, 2026", "proof": []}, "mc_t_030": {"title": "Respond to AI Summit interview invitation", "status_label": "Waiting on you", "workstream": "Speaking", "description": "Pamela Dunn (aisummitspeakers.com) asked if Greg is still interested and wants a call booked via their link. Check compensation and format against the speaking pricing guide before committing.", "goal": "Reply sent after a paid-or-pass decision per the pricing guide", "date": "Jul 06, 2026", "proof": []}, "tr_t27": {"title": "Stand up the master calendar", "status_label": "Recently completed", "workstream": "Systems", "description": "Every event + its promo countdown, plus the per-channel publishing calendar (Operational Plan, Days 1-14).", "goal": "", "date": "Jun 30, 2026", "proof": []}, "tr_t31": {"title": "Put Greg's brand kit in the Drive", "status_label": "Recently completed", "workstream": "Brand", "description": "Add Greg brand kit (colours, fonts, logo, assets) to the shared Drive so everything pulls from one source.", "goal": "", "date": "Jun 27, 2026", "proof": []}, "tr_t2": {"title": "Confirm ticket pricing", "status_label": "Recently completed", "workstream": "Launch", "description": "Resolve tiered ($395.99/495.99/595.99) vs flat $495.99", "goal": "", "date": "Jun 24, 2026", "proof": []}, "tr_t32": {"title": "Set up recurring meetings (Mon + Fri)", "status_label": "Recently completed", "workstream": "Ops", "description": "Create the recurring 'Gregory & Rheanne alignment' meeting Mon 8:00-8:30 (Greg's time) and a Fri 8:00 check-in, same format.", "goal": "", "date": "Jun 23, 2026", "proof": []}, "tr_t22": {"title": "Review the Master Manual", "status_label": "Recently completed", "workstream": "Program", "description": "Read Greg's Master Manual end to end (To-Do List #1).", "goal": "", "date": "Jul 04, 2026", "proof": []}, "tr_t34": {"title": "Optimize the E-speakers profile", "status_label": "Recently completed", "workstream": "Growth", "description": "DONE Jul 6. Speaker profile score raised from 88 to 90 out of 100. Video library grown from 3 to 7 real clips, calendar refreshed with travel and UN holds, and pending review verifications resent. Last step to a perfect score is more client reviews, request emails are drafted and awaiting approval.", "goal": "", "date": "Jul 11, 2026", "proof": []}, "mc_t_083": {"title": "Running-total as a marketing hook", "status_label": "Recently completed", "workstream": "Content", "description": "Week 3 leads with live dollars raised (e.g. 300K in week 1) -- momentum claims can be misleading if stale or if the raise stalls, and need the live figure plus the standard disclaimer every time. found by Fable spec-review of D-004", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_084": {"title": "Brand cross-contamination risk", "status_label": "Recently completed", "workstream": "Content", "description": "Folding Gregory's raise into Rheanne's SEEN Letter mixes two brands' audiences and voices, which the workspace rules explicitly forbid; the newsletter play needs to run on a Gregory/StartupScience list, not Rheanne's. found by Fable spec-review of D-004", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_077": {"title": "Campaign may already be closed", "status_label": "Recently completed", "workstream": "Content", "description": "Opened Feb 3 with ~April close; it is now July 6, so the entire live-campaign plan may be moot, yet the plan proceeds as if open and only queries this as open-question #1/#4 rather than as a blocking gate. found by Fable spec-review of D-004", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_078": {"title": "Co-owner language is legally risky", "status_label": "Recently completed", "workstream": "Content", "description": "SAFEs are a right to future equity, not current ownership, so calling investors co-owners in Reg CF outreach is a misleading-claim exposure and contradicts the compliance section's own spirit. found by Fable spec-review of D-004", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_082": {"title": "Restating specific terms externally", "status_label": "Recently completed", "workstream": "Content", "description": "The plan cites 1,645,000 dollar goal, 20.95M dollar cap, and tiers; guardrail #1 says never restate terms externally, but the plan doesn't mark which numbers are internal-only vs. permitted in a limited Rule 204 notice. found by Fable spec-review of D-004", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_060": {"title": "Runway already gone", "status_label": "Recently completed", "workstream": "Events", "description": "Today is Jul 6 and \"Week 1\" is early-mid July, so the 4-week countback to Aug 8 has effectively started while the plan is still a DRAFT gated behind two open blockers, leaving little or no real promotion window. found by Fable spec-review of D-005", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_061": {"title": "Blockers vs. done-definition conflict", "status_label": "Recently completed", "workstream": "Events", "description": "The task goal requires \"first week of promotion executed,\" but the spec forbids any dated/linked external promotion until T-001 and T-009 clear, so the deliverable can be \"done\" only by executing nothing or by slipping the date. found by Fable spec-review of D-005", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_063": {"title": "\"Registration\" is undefined", "status_label": "Recently completed", "workstream": "Events", "description": "A free LinkedIn RSVP, a $10 paid Eventbrite ticket, and a landing-page email capture are three different things counted against the same \"45\" target, making the metric meaningless and non-comparable across the interim/Eventbrite switch. found by Fable spec-review of D-005", "goal": "", "date": "Jul 06, 2026", "proof": []}, "mc_t_055": {"title": "Compile Greg's outstanding action items from the Jun 29 call recap", "status_label": "Recently completed", "workstream": "Speaking", "description": "", "goal": "Each item has an owner and status in the queue", "date": "Jul 06, 2026", "proof": []}, "mc_t_007": {"title": "Add 4 video candidates to the eSpeakers profile", "status_label": "Recently completed", "workstream": "Speaking", "description": "4 unused video candidates were found on Gregory's YouTube channel; embed them on the eSpeakers profile.", "goal": "4 videos embedded on the profile", "date": "Jul 06, 2026", "proof": []}, "mc_t_029": {"title": "Reply to Lisa Shepard's introduction", "status_label": "Recently completed", "workstream": "Outreach", "description": "Lisa (Greg's wife) introduced herself as the go-to for Greg's schedule and shared his Jul 7-14 travel dates. Warm reply drafted to outbox; save her as the scheduling contact.", "goal": "Reply sent and Lisa recorded as the scheduling contact", "date": "Jul 06, 2026", "proof": []}, "mc_t_020": {"title": "Rebuild the Startup Science sponsorship prospects list", "status_label": "Recently completed", "workstream": "Events", "description": "The sponsorship pipeline stalled on a missing prospects file; locate or rebuild the list so the pipeline has a clear next action.", "goal": "Prospects list located or rebuilt with a clear next action noted", "date": "Jul 06, 2026", "proof": []}, "mc_t_002": {"title": "Draft eSpeakers calendar entry for the UN Sept 21-22 lead", "status_label": "Recently completed", "workstream": "Speaking", "description": "New real lead for the UN engagement on Sept 21-22. Needs a calendar entry drafted so it can be pasted into eSpeakers.", "goal": "Calendar entry drafted and ready to paste into eSpeakers", "date": "Jul 06, 2026", "proof": []}, "mc_t_026": {"title": "Confirm Monday Jul 6 2 PM Pacific meeting with Greg", "status_label": "Recently completed", "workstream": "Events", "description": "Greg asked for a full hour Monday 2 PM Pacific with the team included. Agenda: marketing update, meet Gerardo, account transition, takeover plan. Confirmation email drafted to outbox.", "goal": "Greg confirms and the team has the invite", "date": "Jul 06, 2026", "proof": []}, "mc_t_004": {"title": "Follow up Doug Means meetup co-host outreach", "status_label": "Recently completed", "workstream": "Outreach", "description": "Doug Means (5,644 members) is still an open co-host lead. Send a follow-up and log any reply.", "goal": "Follow-up message sent and reply logged", "date": "Jul 06, 2026", "proof": []}, "mc_t_016": {"title": "Find EO Louisiana direct chapter contact email", "status_label": "Recently completed", "workstream": "Speaking", "description": "Outreach research flagged EO Louisiana as missing a direct contact method before a speaking submission can go out.", "goal": "A verified direct contact email for EO Louisiana exists in the tracker", "date": "Jul 06, 2026", "proof": []}, "mc_t_017": {"title": "Follow up with Shamelle for the event attendance log", "status_label": "Recently completed", "workstream": "Events", "description": "The last Startup Grind event's attendee info was not collected at the door; Shamelle agreed to retrieve a log. Follow up so it does not slip.", "goal": "Attendee list retrieved or confirmed unrecoverable", "date": "Jul 05, 2026", "proof": []}, "mc_t_005": {"title": "Weekly Startup Grind tracker refresh", "status_label": "Recently completed", "workstream": "Events", "description": "Recurring Monday-review/Friday-report cadence for the Startup Grind event-improvement tracker.", "goal": "Tracker rows updated and Friday report drafted", "date": "Jul 05, 2026", "proof": []}}</script>
 
 <dialog id="task-detail">
   <div class="td-wrap">
@@ -762,7 +867,7 @@ ul.col-hidden.is-expanded{display:block;}
 // hash routing plus the read-only task-detail dialog below -- no fetch, no
 // POST, no external requests, no /api anything.
 (function() {
-  var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'roadmap'];
+  var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'plans', 'roadmap'];
 
   function currentView() {
     var h = (location.hash || '').replace('#', '');
