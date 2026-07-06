@@ -1474,6 +1474,59 @@ ul.col-hidden.is-expanded{{display:block;}}
 
   .cal-months{{grid-template-columns:1fr;}}
 }}
+
+/* Guided tour -- pure display logic, no network. Spotlight dims the whole
+   page except a rounded-rect cut-out around the current step's target
+   (box-shadow trick), with a tooltip card anchored near it. Desktop only;
+   mobile (<=767px) uses a fixed bottom sheet instead of an anchored card. */
+.tour-replay-btn{{
+  display:inline-flex;align-items:center;gap:5px;background:var(--blue-bg);color:var(--blue);
+  border:1px solid var(--blue);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;
+  cursor:pointer;margin-right:14px;white-space:nowrap;
+}}
+.tour-replay-btn:hover{{background:var(--blue);color:#fff;}}
+
+.tour-spotlight{{
+  position:fixed;z-index:9998;border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(10,23,48,.55);
+  pointer-events:none;transition:top .2s ease,left .2s ease,width .2s ease,height .2s ease;
+}}
+
+.tour-card{{
+  position:fixed;z-index:9999;background:#fff;border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.3);padding:18px 20px;width:320px;max-width:90vw;
+  border-top:3px solid var(--blue);
+}}
+.tour-card.tour-welcome{{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:360px;text-align:center;
+}}
+.tour-step{{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}}
+.tour-title{{font-size:15.5px;font-weight:800;color:var(--navy);margin:0 0 8px;line-height:1.3;}}
+.tour-body{{font-size:13px;color:#3a3f4a;line-height:1.5;margin:0 0 16px;}}
+.tour-actions{{display:flex;align-items:center;gap:8px;justify-content:flex-end;}}
+.tour-actions.tour-actions-welcome{{justify-content:center;}}
+.tour-skip{{margin-right:auto;background:none;border:none;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;padding:10px 6px;min-height:44px;}}
+.tour-skip:hover{{color:var(--text);}}
+.tour-btn{{
+  min-height:44px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border);background:#f3f2ee;color:var(--navy);
+}}
+.tour-btn:hover{{background:#ebe9e4;}}
+.tour-btn-primary{{background:var(--blue);color:#fff;border-color:var(--blue);}}
+.tour-btn-primary:hover{{background:#1678d4;}}
+.tour-btn[disabled]{{opacity:.4;cursor:default;}}
+
+@media (max-width:767px){{
+  .tour-replay-btn{{padding:8px 10px;font-size:11px;margin-right:8px;}}
+  .tour-card:not(.tour-welcome){{
+    position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;max-width:none;
+    border-radius:16px 16px 0 0;padding:18px 18px calc(16px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 30px rgba(0,0,0,.3);
+  }}
+  .tour-card.tour-welcome{{width:88vw;}}
+  .tour-actions{{flex-wrap:wrap;}}
+  .tour-btn{{flex:1;}}
+}}
 </style>
 </head>
 <body>
@@ -1487,6 +1540,7 @@ ul.col-hidden.is-expanded{{display:block;}}
     </div>
     <div class="tb-center"><span class="pill pill-ontrack">ON TRACK</span></div>
     <div class="tb-right">
+      <button type="button" class="tour-replay-btn" id="tour-replay-btn">&#127891; Tour</button>
       <div class="tb-updated">Updated {DATE}</div>
     </div>
   </div>
@@ -1656,6 +1710,253 @@ ul.col-hidden.is-expanded{{display:block;}}
       btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     }});
   }});
+}})();
+
+// ---- Guided onboarding tour: game-tutorial style spotlight + tooltip walk
+// through the page for Gregory. Pure display logic -- reads/writes only
+// localStorage (gs_tour_done) and location.hash for cross-view steps; no
+// fetch, no POST, no network of any kind. Still part of the single page
+// script (no separate <script> tag).
+(function() {{
+  var TOUR_DONE_KEY = 'gs_tour_done';
+  var STEPS = [
+    {{view: 'overview', selector: '.tb-stats', title: 'Your business at a glance',
+      body: 'Overall progress, tasks done, and active workstreams. These update automatically as your team works.'}},
+    {{view: 'overview', selector: '.pill-ontrack', title: 'The health light',
+      body: 'Green means the engine is running normally.'}},
+    {{view: 'overview', selector: '.needs-section', title: 'The only section that needs you',
+      body: 'Anything here is waiting on your decision or input. Everything else is handled.'}},
+    {{view: 'overview', selector: '.tw-section', title: 'What your team shipped',
+      body: 'Completed work, emails sent, and meetings booked in the last seven days, updated automatically.'}},
+    {{view: 'overview', selector: '.board', title: 'The work itself',
+      body: 'In progress, waiting on you, and recently completed. Tap any card for the full story.'}},
+    {{view: 'overview', selector: '.taskcard, .show-all-btn', title: 'Proof included',
+      body: 'Completed work carries a view proof link where there is something live to see. The Show all button expands the full history.'}},
+    {{view: 'calendar', selector: '.cal-body', title: 'Your dates',
+      body: 'Key events and speaking engagements. A provisional tag means the date is penciled in, not locked.'}},
+    {{view: 'scoreboard', selector: '.scoregrid', title: 'The numbers that matter',
+      body: 'Registrations, sponsors, pipeline value, against targets. These only move when something real happens.'}},
+    {{view: 'roadmap', selector: '.maps', title: 'The roadmap',
+      body: 'The long-term picture your team is executing against.'}}
+  ];
+  var FINAL_STEP = {{
+    title: "That's the whole page.",
+    body: "It keeps itself current. Anything that needs you will always appear in the Needs You section, and Rheanne is one message away."
+  }};
+
+  var tourState = {{active: false, index: -1, skipToEnd: false}};
+  var spotlightEl = null;
+  var cardEl = null;
+  var repositionHandler = null;
+
+  function tourMarkup() {{
+    var wrap = document.createElement('div');
+    wrap.id = 'gs-tour-root';
+    document.body.appendChild(wrap);
+    return wrap;
+  }}
+
+  function removeTourDom() {{
+    var root = document.getElementById('gs-tour-root');
+    if (root) root.parentNode.removeChild(root);
+    spotlightEl = null;
+    cardEl = null;
+    if (repositionHandler) {{
+      window.removeEventListener('resize', repositionHandler);
+      window.removeEventListener('scroll', repositionHandler, true);
+      repositionHandler = null;
+    }}
+    document.removeEventListener('keydown', tourKeydown, true);
+  }}
+
+  function endTour() {{
+    try {{ localStorage.setItem(TOUR_DONE_KEY, '1'); }} catch (e) {{}}
+    tourState.active = false;
+    tourState.index = -1;
+    removeTourDom();
+  }}
+
+  function tourKeydown(ev) {{
+    if (!tourState.active) return;
+    if (ev.key === 'Escape') {{ ev.preventDefault(); endTour(); }}
+    else if (ev.key === 'ArrowRight' || ev.key === 'Enter') {{ ev.preventDefault(); tourNext(); }}
+    else if (ev.key === 'ArrowLeft') {{ ev.preventDefault(); tourBack(); }}
+  }}
+
+  function positionSpotlightAndCard(target, card) {{
+    var isMobile = window.innerWidth <= 767;
+    var rect = target.getBoundingClientRect();
+    var pad = 6;
+    spotlightEl.style.top = (rect.top - pad) + 'px';
+    spotlightEl.style.left = (rect.left - pad) + 'px';
+    spotlightEl.style.width = (rect.width + pad * 2) + 'px';
+    spotlightEl.style.height = (rect.height + pad * 2) + 'px';
+
+    if (isMobile) {{
+      // Bottom sheet -- fixed position via CSS, no inline top/left needed.
+      card.style.top = '';
+      card.style.left = '';
+      return;
+    }}
+
+    var cardRect = card.getBoundingClientRect();
+    var margin = 14;
+    var top = rect.bottom + margin;
+    if (top + cardRect.height > window.innerHeight) {{
+      top = rect.top - cardRect.height - margin;
+    }}
+    if (top < 8) top = 8;
+    var left = rect.left;
+    if (left + cardRect.width > window.innerWidth - 8) {{
+      left = window.innerWidth - cardRect.width - 8;
+    }}
+    if (left < 8) left = 8;
+    card.style.top = top + 'px';
+    card.style.left = left + 'px';
+  }}
+
+  function renderStepCard(root, stepIndex, isFinal) {{
+    var card = document.createElement('div');
+    card.className = 'tour-card';
+    var step = isFinal ? FINAL_STEP : STEPS[stepIndex];
+    var stepLabel = isFinal ? '' : ('<div class="tour-step">Step ' + (stepIndex + 1) + ' of ' + STEPS.length + '</div>');
+    var backDisabled = stepIndex <= 0 ? 'disabled' : '';
+    var nextLabel = isFinal ? 'Done' : 'Next';
+    card.innerHTML =
+      stepLabel +
+      '<div class="tour-title"></div>' +
+      '<div class="tour-body"></div>' +
+      '<div class="tour-actions">' +
+      (isFinal ? '' : '<button type="button" class="tour-skip" data-tour-skip>Skip</button>') +
+      (isFinal ? '' : '<button type="button" class="tour-btn" data-tour-back ' + backDisabled + '>Back</button>') +
+      '<button type="button" class="tour-btn tour-btn-primary" data-tour-next>' + nextLabel + '</button>' +
+      '</div>';
+    card.querySelector('.tour-title').textContent = step.title;
+    card.querySelector('.tour-body').textContent = step.body;
+    return card;
+  }}
+
+  function goToStep(index) {{
+    if (index >= STEPS.length) {{ showFinalCard(); return; }}
+    if (index < 0) index = 0;
+    tourState.index = index;
+
+    var step = STEPS[index];
+    var hash = '#' + step.view;
+    var needsHashChange = (location.hash || '#overview').replace('#', '') !== step.view;
+    if (needsHashChange) location.hash = hash;
+
+    var delay = needsHashChange ? 350 : 0;
+    setTimeout(function() {{
+      var target = document.querySelector(step.selector);
+      if (!target) {{
+        // Missing selector -> skip this step gracefully.
+        goToStep(index + 1);
+        return;
+      }}
+      target.scrollIntoView({{block: 'center'}});
+      setTimeout(function() {{ renderActiveStep(target, index); }}, 60);
+    }}, delay);
+  }}
+
+  function renderActiveStep(target, index) {{
+    var root = document.getElementById('gs-tour-root') || tourMarkup();
+    root.innerHTML = '';
+
+    spotlightEl = document.createElement('div');
+    spotlightEl.className = 'tour-spotlight';
+    root.appendChild(spotlightEl);
+
+    cardEl = renderStepCard(root, index, false);
+    root.appendChild(cardEl);
+
+    positionSpotlightAndCard(target, cardEl);
+
+    cardEl.querySelector('[data-tour-next]').addEventListener('click', tourNext);
+    var backBtn = cardEl.querySelector('[data-tour-back]');
+    if (backBtn) backBtn.addEventListener('click', tourBack);
+    var skipBtn = cardEl.querySelector('[data-tour-skip]');
+    if (skipBtn) skipBtn.addEventListener('click', endTour);
+
+    repositionHandler = function() {{ positionSpotlightAndCard(target, cardEl); }};
+    window.addEventListener('resize', repositionHandler);
+    window.addEventListener('scroll', repositionHandler, true);
+  }}
+
+  function showFinalCard() {{
+    if (repositionHandler) {{
+      window.removeEventListener('resize', repositionHandler);
+      window.removeEventListener('scroll', repositionHandler, true);
+      repositionHandler = null;
+    }}
+    var root = document.getElementById('gs-tour-root') || tourMarkup();
+    root.innerHTML = '';
+
+    spotlightEl = document.createElement('div');
+    spotlightEl.className = 'tour-spotlight';
+    spotlightEl.style.top = '-9999px';
+    spotlightEl.style.left = '-9999px';
+    spotlightEl.style.width = '0';
+    spotlightEl.style.height = '0';
+    root.appendChild(spotlightEl);
+
+    cardEl = renderStepCard(root, -1, true);
+    cardEl.classList.add('tour-welcome');
+    root.appendChild(cardEl);
+
+    cardEl.querySelector('[data-tour-next]').addEventListener('click', endTour);
+  }}
+
+  function tourNext() {{ goToStep(tourState.index + 1); }}
+  function tourBack() {{ if (tourState.index > 0) goToStep(tourState.index - 1); }}
+
+  function showWelcomeCard() {{
+    var root = document.getElementById('gs-tour-root') || tourMarkup();
+    root.innerHTML = '';
+
+    var card = document.createElement('div');
+    card.className = 'tour-card tour-welcome';
+    card.innerHTML =
+      '<div class="tour-title">Welcome, Greg.</div>' +
+      '<div class="tour-body">Two minutes and you\\'ll know exactly how to read this page.</div>' +
+      '<div class="tour-actions tour-actions-welcome">' +
+      '<button type="button" class="tour-btn" data-tour-later>Maybe later</button>' +
+      '<button type="button" class="tour-btn tour-btn-primary" data-tour-start>Show me</button>' +
+      '</div>';
+    root.appendChild(card);
+
+    card.querySelector('[data-tour-start]').addEventListener('click', function() {{
+      root.innerHTML = '';
+      tourState.active = true;
+      document.addEventListener('keydown', tourKeydown, true);
+      goToStep(0);
+    }});
+    card.querySelector('[data-tour-later]').addEventListener('click', function() {{
+      // Session-only skip: no localStorage write, so the welcome card
+      // reappears on the next fresh visit.
+      removeTourDom();
+    }});
+  }}
+
+  function startTour() {{
+    tourState.active = true;
+    document.addEventListener('keydown', tourKeydown, true);
+    goToStep(0);
+  }}
+
+  var replayBtn = document.getElementById('tour-replay-btn');
+  if (replayBtn) {{
+    replayBtn.addEventListener('click', function() {{
+      removeTourDom();
+      startTour();
+    }});
+  }}
+
+  var alreadyDone = false;
+  try {{ alreadyDone = localStorage.getItem(TOUR_DONE_KEY) === '1'; }} catch (e) {{ alreadyDone = false; }}
+  if (!alreadyDone) {{
+    showWelcomeCard();
+  }}
 }})();
 </script>
 </body></html>
