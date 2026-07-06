@@ -38,6 +38,7 @@ import shutil
 import datetime
 import calendar as calmod
 import html as html_lib
+from urllib.parse import urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 XLSX = os.path.join(HERE, "Startup_Architect_Master_Tracker.xlsx")
@@ -104,6 +105,39 @@ AGENT_NAMES = {
     "atlas", "forge", "vet", "scout", "scribe", "warden", "concierge", "jesamie",
     "planner", "builder", "checker",
 }
+
+# Proof-link privacy wall -- a completed mission-control task may carry
+# "proof": [{"url","label","ts"}]. Only proof URLs whose host is on this
+# public-safe allowlist are ever rendered on Greg's page; anything else
+# (most importantly mail.google.com -- Rheanne's mailbox, not Greg-facing)
+# is skipped silently, never surfaced, never logged to the page.
+PROOF_HOST_ALLOWLIST = {
+    "gregoryshepard.com",
+    "rheannerazo.github.io",
+    "eventbrite.com",
+    "linkedin.com",
+    "youtube.com",
+    "youtu.be",
+    "substack.com",
+    "espeakers.com",
+    "wefunder.com",
+}
+
+
+def _proof_host_allowed(url):
+    """True only if url is http(s) and its host is on the allowlist (bare
+    domain or any subdomain of it, e.g. www.gregoryshepard.com,
+    m.youtube.com). Anything unparsable, non-http(s), or off-list -> False."""
+    try:
+        parsed = urlparse((url or "").strip())
+    except ValueError:
+        return False
+    if parsed.scheme not in ("http", "https"):
+        return False
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return False
+    return any(host == d or host.endswith("." + d) for d in PROOF_HOST_ALLOWLIST)
 
 
 def mc_workstream_allowed(ws):
@@ -289,6 +323,23 @@ def _load_json(path):
         return None
 
 
+def _clean_proof(raw_proof):
+    """Sanitize a task's raw proof list -> [{"url","label"}], allowlisted
+    hosts only, labels run through the same text pipeline as everything
+    else. Silently drops anything off-allowlist, malformed, or unlabeled-
+    and-unlinkable. Order preserved (first entry = first/primary proof)."""
+    out = []
+    for p in (raw_proof or []):
+        if not isinstance(p, dict):
+            continue
+        url = clean(p.get("url", ""))
+        if not url or not _proof_host_allowed(url):
+            continue
+        label = scrub_agent_names(clean_client_text(safe(clean(p.get("label", ""))))) or "View proof"
+        out.append({"url": url, "label": label})
+    return out
+
+
 def load_mc_tasks():
     """Mission-control tasks, filtered to Gregory-relevant workstreams only.
 
@@ -322,6 +373,7 @@ def load_mc_tasks():
             "workstream": display_workstream(ws_raw),
             "status": status,
             "updated": clean(t.get("updated", "")),
+            "proof": _clean_proof(t.get("proof")),
         })
     return out
 
@@ -519,7 +571,7 @@ def _normalize_tracker_card(t):
         "id": "tr_" + slug(clean(t.get("ID", "")) or title),
         "title": title, "workstream": ws, "note": note, "bucket": bucket,
         "description": desc, "goal": "", "date": clean(date),
-        "updated": date,
+        "updated": date, "proof": [],
     }
 
 
@@ -548,6 +600,7 @@ def _normalize_mc_card(t):
         "goal": scrub_agent_names(clean_client_text(safe(clean(t.get("goal", ""))))),
         "date": clean(t.get("updated", "")),
         "updated": t.get("updated", ""),
+        "proof": t.get("proof") or [],
     }
 
 
@@ -568,17 +621,29 @@ def _display_date(date_str):
     return s
 
 
-def build_board_card(card):
+def build_board_card(card, hidden=False):
     title = esc(card["title"])
     ws = esc(card["workstream"])
     note = card.get("note", "")
     note_html = f'<div class="task-desc">{esc(note)}</div>' if note else ""
     cid = esc(card["id"])
+    proof_html = ""
+    if card.get("bucket") == "done":
+        proof = card.get("proof") or []
+        if proof:
+            first = proof[0]
+            proof_html = (
+                f'<a class="proof-link" href="{esc(first["url"])}" target="_blank" '
+                f'rel="noopener" onclick="event.stopPropagation()">'
+                f'&#128279; view proof</a>'
+            )
+    cls = "taskcard card-hidden" if hidden else "taskcard"
     return f"""
-<div class="taskcard" data-task-detail="{cid}" tabindex="0" role="button">
+<div class="{cls}" data-task-detail="{cid}" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">{title}</div></div>
   <div class="tag-row"><span class="tag">{ws}</span></div>
   {note_html}
+  {proof_html}
   <div class="task-details-hint">details &rsaquo;</div>
 </div>
 """
@@ -600,12 +665,18 @@ def build_board(tasks, mc_tasks=None):
     for key, label, color, _statuses in BOARD_COLUMNS:
         col_cards = [c for c in cards if c["bucket"] == key]
         if key == "done":
-            # Most recent 8, newest first.
+            # Most recent first.
             col_cards.sort(key=lambda c: c.get("updated", ""), reverse=True)
         total_n = len(col_cards)
         counts[key] = total_n
         shown = col_cards[:COLUMN_CAP]
-        for c in shown:
+        # "Recently completed" gets every remaining card rendered into the
+        # DOM up front (hidden via .card-hidden) so the "Show all" toggle
+        # below is a pure client-side class flip -- no fetch, no re-render.
+        # Other columns keep the old hard cap (board stays department-level,
+        # not a full backlog dump).
+        hidden = col_cards[COLUMN_CAP:] if key == "done" else []
+        for c in shown + hidden:
             task_payload[c["id"]] = {
                 "title": c["title"],
                 "status_label": BUCKET_STATUS_LABEL.get(c["bucket"], ""),
@@ -613,11 +684,20 @@ def build_board(tasks, mc_tasks=None):
                 "description": c.get("description", "") or c.get("note", ""),
                 "goal": c.get("goal", ""),
                 "date": _display_date(c.get("date", "")),
+                "proof": c.get("proof") or [],
             }
         cards_html = "".join(build_board_card(c) for c in shown) or '<p class="col-empty">Nothing here right now.</p>'
         more_html = ""
         remaining = total_n - len(shown)
-        if remaining > 0:
+        if remaining > 0 and key == "done":
+            hidden_html = "".join(build_board_card(c, hidden=True) for c in hidden)
+            more_html = (
+                f'<div class="col-hidden" data-hidden-cards>{hidden_html}</div>'
+                f'<button type="button" class="show-all-btn" data-show-all '
+                f'data-show-label="Show all {remaining} &#9662;" '
+                f'data-hide-label="Show fewer &#9652;">Show all {remaining} &#9662;</button>'
+            )
+        elif remaining > 0:
             more_html = f'<p class="col-more muted">+{remaining} more</p>'
         columns_html += f"""
     <div class="col">
@@ -666,6 +746,10 @@ def build_task_detail_dialog():
     </div>
     <div class="td-section" id="td-goal-section">
       <div class="td-goal"><span class="td-goal-label">Done when:</span> <span id="td-goal-text"></span></div>
+    </div>
+    <div class="td-section" id="td-proof-section">
+      <div class="td-proof-label">Proof</div>
+      <div class="td-proof-list" id="td-proof-list"></div>
     </div>
     <div class="td-date" id="td-date"></div>
     <div class="td-footer">
@@ -860,7 +944,10 @@ def build_this_week(mc_tasks, today=None):
     # 1. Tasks completed this week (mission-control, already workstream-filtered).
     completed = [t for t in mc_tasks if t.get("status") == "done" and in_window(t.get("updated"))]
     completed.sort(key=lambda t: t.get("updated", ""), reverse=True)
-    completed_titles = [t["title"] for t in completed[:5]]
+    completed_titles = [t["title"] for t in completed]
+    TW_LIST_CAP = 5
+    shown_titles = completed_titles[:TW_LIST_CAP]
+    hidden_titles = completed_titles[TW_LIST_CAP:]
 
     # 2. Outbox emails sent this week (subjects only).
     outbox = load_mc_outbox()
@@ -891,9 +978,19 @@ def build_this_week(mc_tasks, today=None):
         return ""
 
     completed_html = ""
-    if completed_titles:
-        items = "".join(f'<li>{esc(t)}</li>' for t in completed_titles)
-        completed_html = f'<ul class="tw-list">{items}</ul>'
+    if shown_titles:
+        items = "".join(f'<li>{esc(t)}</li>' for t in shown_titles)
+        show_all_html = ""
+        if hidden_titles:
+            hidden_items = "".join(f'<li>{esc(t)}</li>' for t in hidden_titles)
+            n = len(hidden_titles)
+            show_all_html = (
+                f'<ul class="tw-list col-hidden" data-hidden-cards>{hidden_items}</ul>'
+                f'<button type="button" class="show-all-btn" data-show-all '
+                f'data-show-label="Show all {n} &#9662;" '
+                f'data-hide-label="Show fewer &#9652;">Show all {n} &#9662;</button>'
+            )
+        completed_html = f'<ul class="tw-list">{items}</ul>{show_all_html}'
 
     next_html = ""
     if next_up:
@@ -1240,6 +1337,21 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 .tag-row{{display:flex;flex-wrap:wrap;gap:5px;}}
 .tag{{background:#f3f2ee;color:#5b606b;font-size:10px;border-radius:5px;padding:2px 7px;}}
 .task-details-hint{{font-size:10.5px;font-weight:700;color:var(--blue);margin-top:8px;opacity:0;transition:opacity .15s;}}
+.proof-link{{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--blue);text-decoration:none;margin-top:8px;}}
+.proof-link:hover{{text-decoration:underline;}}
+
+/* Show all / show fewer toggle -- Recently completed column + This Week
+   completed-titles list. Pure CSS class flip driven by the router script
+   below; no fetch, no server round-trip, every card is already in the DOM. */
+.col-hidden{{display:none;}}
+.col-hidden.is-expanded{{display:flex;flex-direction:column;gap:10px;}}
+ul.col-hidden.is-expanded{{display:block;}}
+.show-all-btn{{
+  display:block;width:100%;margin-top:4px;padding:10px 12px;min-height:44px;
+  background:#f3f2ee;border:1px solid var(--border);border-radius:8px;
+  font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;text-align:center;
+}}
+.show-all-btn:hover{{background:#ebe9e4;}}
 
 /* Task detail dialog -- read-only: title, status, workstream, description,
    "Done when", date, single Close button. No other actions. */
@@ -1256,6 +1368,10 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 .td-desc{{font-size:13.5px;color:#3a3f4a;line-height:1.5;}}
 .td-goal{{font-size:13px;color:#3a3f4a;line-height:1.5;font-style:italic;}}
 .td-goal-label{{font-weight:700;font-style:normal;color:var(--navy);}}
+.td-proof-label{{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px;}}
+.td-proof-list{{display:flex;flex-direction:column;gap:6px;}}
+.td-proof-list a{{font-size:13px;font-weight:600;color:var(--blue);text-decoration:none;}}
+.td-proof-list a:hover{{text-decoration:underline;}}
 .td-date{{font-size:11.5px;color:var(--muted);margin-bottom:6px;}}
 .td-footer{{display:flex;margin-top:6px;padding-top:14px;border-top:1px solid var(--border);}}
 .td-footer .btn-cmd{{margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;}}
@@ -1459,6 +1575,8 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
   var tdDesc = document.getElementById('td-desc');
   var tdGoalSection = document.getElementById('td-goal-section');
   var tdGoalText = document.getElementById('td-goal-text');
+  var tdProofSection = document.getElementById('td-proof-section');
+  var tdProofList = document.getElementById('td-proof-list');
   var tdDate = document.getElementById('td-date');
 
   function openTaskDetail(taskId) {{
@@ -1477,6 +1595,20 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 
     if (tdGoalText) tdGoalText.textContent = t.goal || '';
     if (tdGoalSection) tdGoalSection.style.display = t.goal ? '' : 'none';
+
+    var proof = t.proof || [];
+    if (tdProofList) {{
+      tdProofList.innerHTML = '';
+      proof.forEach(function(p) {{
+        var a = document.createElement('a');
+        a.href = p.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = '\U0001F517 ' + (p.label || 'View proof');
+        tdProofList.appendChild(a);
+      }});
+    }}
+    if (tdProofSection) tdProofSection.style.display = proof.length ? '' : 'none';
 
     if (tdDate) tdDate.textContent = t.date || '';
 
@@ -1508,6 +1640,22 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
       if (ev.target === tdDialog) tdDialog.close();
     }});
   }}
+
+  // ---- Show all / Show fewer toggle: Recently completed column + This
+  // Week completed-titles list. Every hidden card/item is already in the
+  // DOM (rendered server-side); this just flips a class and swaps the
+  // button label. No fetch, no re-render.
+  document.querySelectorAll('[data-show-all]').forEach(function(btn) {{
+    var hidden = btn.previousElementSibling;
+    if (!hidden || !hidden.hasAttribute('data-hidden-cards')) return;
+    var showLabel = btn.getAttribute('data-show-label') || btn.textContent;
+    var hideLabel = btn.getAttribute('data-hide-label') || 'Show fewer';
+    btn.addEventListener('click', function() {{
+      var expanded = hidden.classList.toggle('is-expanded');
+      btn.innerHTML = expanded ? hideLabel : showLabel;
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }});
+  }});
 }})();
 </script>
 </body></html>
