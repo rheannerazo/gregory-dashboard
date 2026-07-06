@@ -95,6 +95,7 @@ BLOCKLIST = [
 # counted, never named.
 GREG_WORKSTREAMS = {
     "events", "speaking", "outreach", "newsletter", "content", "website", "meetings",
+    "startupscience",
 }
 
 # Internal agent names -- must never appear on this page. Attribute
