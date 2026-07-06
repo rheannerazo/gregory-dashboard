@@ -119,12 +119,42 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
 .col-empty{padding:6px 4px;font-size:11.5px;color:var(--muted);}
 .col-more{padding:2px 4px;font-size:11px;}
 
-.taskcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;}
+.taskcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.taskcard:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(26,140,240,.12);}
+.taskcard:hover .task-details-hint{opacity:1;}
+.taskcard:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
 .task-title-row{margin-bottom:6px;}
 .task-title{font-weight:700;font-size:13.5px;line-height:1.3;color:var(--navy);}
 .task-desc{font-size:12px;color:#5b606b;line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .tag-row{display:flex;flex-wrap:wrap;gap:5px;}
 .tag{background:#f3f2ee;color:#5b606b;font-size:10px;border-radius:5px;padding:2px 7px;}
+.task-details-hint{font-size:10.5px;font-weight:700;color:var(--blue);margin-top:8px;opacity:0;transition:opacity .15s;}
+
+/* Task detail dialog -- read-only: title, status, workstream, description,
+   "Done when", date, single Close button. No other actions. */
+#task-detail{border:none;border-radius:14px;padding:0;max-width:520px;width:92vw;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);}
+#task-detail::backdrop{background:rgba(20,20,20,.45);}
+.td-wrap{padding:22px 24px 20px;overflow-y:auto;max-height:85vh;position:relative;}
+.td-close{position:absolute;top:14px;right:16px;border:none;background:transparent;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px;}
+.td-close:hover{color:var(--text);}
+.td-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding-right:28px;}
+.td-status{font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--blue);background:var(--blue-bg);border-radius:4px;padding:3px 8px;}
+.td-workstream{font-size:9.5px;font-weight:700;color:#5b606b;background:#f3f2ee;border-radius:4px;padding:3px 8px;}
+.td-title{font-size:18px;font-weight:800;margin:0 0 12px;line-height:1.3;color:var(--navy);}
+.td-section{margin-bottom:14px;}
+.td-desc{font-size:13.5px;color:#3a3f4a;line-height:1.5;}
+.td-goal{font-size:13px;color:#3a3f4a;line-height:1.5;font-style:italic;}
+.td-goal-label{font-weight:700;font-style:normal;color:var(--navy);}
+.td-date{font-size:11.5px;color:var(--muted);margin-bottom:6px;}
+.td-footer{display:flex;margin-top:6px;padding-top:14px;border-top:1px solid var(--border);}
+.td-footer .btn-cmd{margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;}
+.td-footer .btn-cmd:hover{background:#1678d4;}
+
+@media (max-width:767px){
+  #task-detail{max-width:none;width:100vw;height:100dvh;max-height:100dvh;margin:0;top:0;left:0;border-radius:0;}
+  .td-wrap{max-height:100dvh;height:100%;padding:18px 16px calc(16px + env(safe-area-inset-bottom));}
+  .td-footer .btn-cmd{width:100%;min-height:44px;}
+}
 
 /* Scoreboard */
 .scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
@@ -155,6 +185,9 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
 .cal-badge-tbd{background:#f3f2ee;color:var(--muted);}
 .cal-title{font-weight:700;font-size:13px;color:var(--navy);}
 .cal-where{font-size:12px;margin-top:2px;}
+.cal-pill,.kd-pill{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:999px;padding:2px 7px;vertical-align:middle;}
+.cal-recent-head{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:18px 0 12px;padding-top:14px;border-top:1px solid var(--border);}
+.cal-recent-list{opacity:.75;}
 
 /* Maps / roadmap */
 .maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
@@ -269,7 +302,7 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
   
     <div class="kd-card">
       <div class="kd-head">KEY DATES</div>
-      <div class="kd-list"><div class="kd-row"><span class="kd-badge">TBD</span><span class="kd-title">Know Your Phase Masterclass</span></div><div class="kd-row"><span class="kd-badge">Sep 21</span><span class="kd-title">UN speaking engagement (lead)</span></div></div>
+      <div class="kd-list"><div class="kd-row"><span class="kd-badge">Jul 06</span><span class="kd-title">Team sync (2 PM Pacific)</span></div><div class="kd-row"><span class="kd-badge">Jul 14</span><span class="kd-title">Speaker call (hold)</span></div><div class="kd-row"><span class="kd-badge">Aug 08</span><span class="kd-title">Know Your Phase Masterclass <span class="kd-pill">provisional</span></span></div></div>
     </div>
 
 </aside>
@@ -286,9 +319,9 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
   </div>
   <div class="tw-grid">
     <div class="tw-card">
-      <div class="tw-num">2</div>
+      <div class="tw-num">4</div>
       <div class="tw-label">Tasks completed</div>
-      <ul class="tw-list"><li>Follow up with Shamelle for the event attendance log</li><li>Weekly Startup Grind tracker refresh</li></ul>
+      <ul class="tw-list"><li>Follow up Doug Means meetup co-host outreach</li><li>Find EO Louisiana direct chapter contact email</li><li>Follow up with Shamelle for the event attendance log</li><li>Weekly Startup Grind tracker refresh</li></ul>
     </div>
     <div class="tw-card">
       <div class="tw-num">0</div>
@@ -299,7 +332,7 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
       <div class="tw-label">Meetings booked</div>
     </div>
   </div>
-  <div class="tw-next"><span class="tw-next-label">Next up:</span> StartupScience sync (2 PM PT): marketing, Gerardo, takeover plan &mdash; Jul 06</div>
+  <div class="tw-next"><span class="tw-next-label">Next up:</span> Team sync (2 PM Pacific) &mdash; Jul 06</div>
 </section>
 
     
@@ -316,57 +349,65 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
       <div class="col-head">
         <span class="col-dot" style="background:#1A8CF0"></span>
         <span class="col-name">IN PROGRESS</span>
-        <span class="col-count">13</span>
+        <span class="col-count">12</span>
       </div>
       <div class="col-body">
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t6" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Build website registration page</div></div>
   <div class="tag-row"><span class="tag">Website</span></div>
   <div class="task-desc">The landing page all traffic points to</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t7" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Create QR code to the 2-Day</div></div>
   <div class="tag-row"><span class="tag">Launch</span></div>
   <div class="task-desc">Use HOVERCODE (Greg client tool) for the QR, per client-tools rule. Needs T3 Hovercode access. Do not substitute a free generator.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t8" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Cross-platform positioning rollout</div></div>
   <div class="tag-row"><span class="tag">Brand</span></div>
   <div class="task-desc">Positioning already updated on Threads/IG/X/Substack/TikTok + LinkedIn content cross-posted. IG + TikTok confirmed good. YouTube still pending.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t21" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Daily content engine</div></div>
   <div class="tag-row"><span class="tag">Content</span></div>
   <div class="task-desc">Recurring: LinkedIn post/engage/outreach + repurpose 1 piece</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_001" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Confirm masterclass date at The Bornemann Theatre</div></div>
   <div class="tag-row"><span class="tag">Events</span></div>
   <div class="task-desc">Venue is booked pending final date. Greg needs to pick an early-August date so the registration page and promotion can go live.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_002" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Draft eSpeakers calendar entry for the UN Sept 21-22 lead</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
   <div class="task-desc">New real lead for the UN engagement on Sept 21-22. Needs a calendar entry drafted so it can be pasted into eSpeakers.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_003" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Repurpose 3 unpublished website articles into newsletter drafts</div></div>
   <div class="tag-row"><span class="tag">Newsletter</span></div>
   <div class="task-desc">Pull from the 40+ unpublished website articles and adapt 3 into newsletter-ready drafts matching Gregory&#x27;s voice.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
-  <div class="task-title-row"><div class="task-title">Follow up Doug Means meetup co-host outreach</div></div>
-  <div class="tag-row"><span class="tag">Outreach</span></div>
-  <div class="task-desc">Doug Means (5,644 members) is still an open co-host lead. Send a follow-up and log any reply.</div>
+<div class="taskcard" data-task-detail="mc_t_007" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Add 4 video candidates to the eSpeakers profile</div></div>
+  <div class="tag-row"><span class="tag">Speaking</span></div>
+  <div class="task-desc">4 unused video candidates were found on Gregory&#x27;s YouTube channel; embed them on the eSpeakers profile.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
-<p class="col-more muted">+5 more</p></div>
+<p class="col-more muted">+4 more</p></div>
     </div>
 
     <div class="col">
@@ -376,40 +417,46 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
         <span class="col-count">6</span>
       </div>
       <div class="col-body">
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t3" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Greg unblocks access</div></div>
   <div class="tag-row"><span class="tag">Setup</span></div>
   
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t30" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Get Greg&#x27;s travel calendar</div></div>
   <div class="tag-row"><span class="tag">Ops</span></div>
   <div class="task-desc">Greg will send his travel calendar; use it to schedule events and asks around his availability.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_011" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Get Greg&#x27;s decision on paid-speaking HOLDs</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
   <div class="task-desc">TIGER 21 and TEC Canada are on hold pending Greg&#x27;s confirmation of compensation terms before submitting or calling the organizer.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_013" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Confirm 4th WeFunder company name for the website</div></div>
   <div class="tag-row"><span class="tag">Website</span></div>
   <div class="task-desc">The ventures-investments page is incomplete pending Greg naming the fourth active WeFunder-backed company.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_014" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Resolve Book 101 Review scheduling question</div></div>
   <div class="tag-row"><span class="tag">Outreach</span></div>
   <div class="task-desc">Podcast guest invite needs Greg&#x27;s input on whether it is the same show as the April 15 recording; a scheduling reply is still open.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="mc_t_028" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Resolve Jul 14 Speaker Initial Call vs travel conflict</div></div>
   <div class="tag-row"><span class="tag">Speaking</span></div>
   <div class="task-desc">Laptop Lifestyle booked Greg for a Speaker Initial Call Tue Jul 14 8 AM PT, but Greg is away Jul 7-14. Confirm whether he can take it or it must move.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 </div>
     </div>
@@ -418,57 +465,65 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
       <div class="col-head">
         <span class="col-dot" style="background:#16a34a"></span>
         <span class="col-name">RECENTLY COMPLETED</span>
-        <span class="col-count">8</span>
+        <span class="col-count">10</span>
       </div>
       <div class="col-body">
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t27" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Stand up the master calendar</div></div>
   <div class="tag-row"><span class="tag">Systems</span></div>
   <div class="task-desc">Every event + its promo countdown, plus the per-channel publishing calendar (Operational Plan, Days 1-14).</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t31" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Put Greg&#x27;s brand kit in the Drive</div></div>
   <div class="tag-row"><span class="tag">Brand</span></div>
   <div class="task-desc">Add Greg brand kit (colours, fonts, logo, assets) to the shared Drive so everything pulls from one source.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t2" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Confirm ticket pricing</div></div>
   <div class="tag-row"><span class="tag">Launch</span></div>
   <div class="task-desc">Pricing LOCKED at the meeting. Drop the confirm-on-Monday step.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t32" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Set up recurring meetings (Mon + Fri)</div></div>
   <div class="tag-row"><span class="tag">Ops</span></div>
   <div class="task-desc">Create the recurring &#x27;Gregory &amp; Rheanne alignment&#x27; meeting Mon 8:00-8:30 (Greg&#x27;s time) and a Fri 8:00 check-in, same format.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t22" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Review the Master Manual</div></div>
   <div class="tag-row"><span class="tag">Program</span></div>
   <div class="task-desc">Read Greg&#x27;s Master Manual end to end (To-Do List #1).</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
+<div class="taskcard" data-task-detail="tr_t34" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">Optimize the E-speakers profile</div></div>
   <div class="tag-row"><span class="tag">Growth</span></div>
   <div class="task-desc">DONE Jul 6. Speaker profile score raised from 88 to 90 out of 100. Video library grown from 3 to 7 real clips, calendar refreshed with travel and UN holds, and pending review verifications resent. Last step to a perfect score is more client reviews, request emails are drafted and awaiting approval.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
-  <div class="task-title-row"><div class="task-title">Follow up with Shamelle for the event attendance log</div></div>
-  <div class="tag-row"><span class="tag">Events</span></div>
-  <div class="task-desc">The last Startup Grind event&#x27;s attendee info was not collected at the door; Shamelle agreed to retrieve a log. Follow up so it does not slip.</div>
+<div class="taskcard" data-task-detail="mc_t_004" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Follow up Doug Means meetup co-host outreach</div></div>
+  <div class="tag-row"><span class="tag">Outreach</span></div>
+  <div class="task-desc">Doug Means (5,644 members) is still an open co-host lead. Send a follow-up and log any reply.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 
-<div class="taskcard">
-  <div class="task-title-row"><div class="task-title">Weekly Startup Grind tracker refresh</div></div>
-  <div class="tag-row"><span class="tag">Events</span></div>
-  <div class="task-desc">Recurring Monday-review/Friday-report cadence for the Startup Grind event-improvement tracker.</div>
+<div class="taskcard" data-task-detail="mc_t_016" tabindex="0" role="button">
+  <div class="task-title-row"><div class="task-title">Find EO Louisiana direct chapter contact email</div></div>
+  <div class="tag-row"><span class="tag">Speaking</span></div>
+  <div class="task-desc">Outreach research flagged EO Louisiana as missing a direct contact method before a speaking submission can go out.</div>
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
-</div>
+<p class="col-more muted">+2 more</p></div>
     </div>
 </div>
   </section>
@@ -478,10 +533,11 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
     <p class="section-sub">What's on the calendar for the launch.</p>
     
 <div class="cal-body">
-  <div class="cal-months"><div class="cal-month"><div class="cal-month-title">July 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day is-today"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">August 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day has-event"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">September 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day has-event"><span>21</span></div><div class="cal-day has-event"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div></div>
+  <div class="cal-months"><div class="cal-month"><div class="cal-month-title">July 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day has-event is-today"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day has-event"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">August 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day has-event"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day"><span>21</span></div><div class="cal-day"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day"><span>31</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div><div class="cal-month"><div class="cal-month-title">September 2026</div><div class="cal-grid"><div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><span>1</span></div><div class="cal-day"><span>2</span></div><div class="cal-day"><span>3</span></div><div class="cal-day"><span>4</span></div><div class="cal-day"><span>5</span></div><div class="cal-day"><span>6</span></div><div class="cal-day"><span>7</span></div><div class="cal-day"><span>8</span></div><div class="cal-day"><span>9</span></div><div class="cal-day"><span>10</span></div><div class="cal-day"><span>11</span></div><div class="cal-day"><span>12</span></div><div class="cal-day"><span>13</span></div><div class="cal-day"><span>14</span></div><div class="cal-day"><span>15</span></div><div class="cal-day"><span>16</span></div><div class="cal-day"><span>17</span></div><div class="cal-day"><span>18</span></div><div class="cal-day"><span>19</span></div><div class="cal-day"><span>20</span></div><div class="cal-day has-event"><span>21</span></div><div class="cal-day has-event"><span>22</span></div><div class="cal-day"><span>23</span></div><div class="cal-day"><span>24</span></div><div class="cal-day"><span>25</span></div><div class="cal-day"><span>26</span></div><div class="cal-day"><span>27</span></div><div class="cal-day"><span>28</span></div><div class="cal-day"><span>29</span></div><div class="cal-day"><span>30</span></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div></div></div></div>
   <div class="cal-upcoming">
     <div class="cal-upcoming-head">Upcoming</div>
-    <div class="cal-upcoming-list"><div class="cal-row"><div class="cal-badge cal-badge-tbd">date TBD</div><div class="cal-info"><div class="cal-title">Know Your Phase Masterclass</div><div class="cal-where muted">The Bornemann Theatre, San Marcos</div></div></div><div class="cal-row"><div class="cal-badge">Sep 21&ndash;22</div><div class="cal-info"><div class="cal-title">UN speaking engagement (lead)</div><div class="cal-where muted">TBC</div></div></div></div>
+    <div class="cal-upcoming-list"><div class="cal-row"><div class="cal-badge">Jul 06</div><div class="cal-info"><div class="cal-title">Team sync (2 PM Pacific)</div><div class="cal-where muted">Video call</div></div></div><div class="cal-row"><div class="cal-badge">Jul 14</div><div class="cal-info"><div class="cal-title">Speaker call (hold)</div><div class="cal-where muted">Zoom</div></div></div><div class="cal-row"><div class="cal-badge">Aug 08</div><div class="cal-info"><div class="cal-title">Know Your Phase Masterclass <span class="cal-pill">provisional</span></div><div class="cal-where muted">The Bornemann Theatre, San Marcos</div></div></div><div class="cal-row"><div class="cal-badge">Sep 21&ndash;22</div><div class="cal-info"><div class="cal-title">UN speaking engagement (lead)</div><div class="cal-where muted">TBC</div></div></div></div>
+    
   </div>
 </div>
 
@@ -502,13 +558,38 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
 
 <div class="foot">Prepared and kept current by your Chief of Staff department.</div>
 
+<script type="application/json" id="task-data">{"tr_t6": {"title": "Build website registration page", "status_label": "In progress", "workstream": "Website", "description": "The landing page all traffic points to", "goal": "", "date": "Jul 01, 2026"}, "tr_t7": {"title": "Create QR code to the 2-Day", "status_label": "In progress", "workstream": "Launch", "description": "Hovercode QR linking lecture to 2-Day", "goal": "", "date": "Jun 27, 2026"}, "tr_t8": {"title": "Cross-platform positioning rollout", "status_label": "In progress", "workstream": "Brand", "description": "Set brand on Substack, X, IG, FB, YT, TikTok, LI company/newsletter", "goal": "", "date": "Jul 05, 2026"}, "tr_t21": {"title": "Daily content engine", "status_label": "In progress", "workstream": "Content", "description": "Recurring: LinkedIn post/engage/outreach + repurpose 1 piece", "goal": "", "date": "daily"}, "mc_t_001": {"title": "Confirm masterclass date at The Bornemann Theatre", "status_label": "In progress", "workstream": "Events", "description": "Venue is booked pending final date. Greg needs to pick an early-August date so the registration page and promotion can go live.", "goal": "Date locked with the venue and reflected on the event registration page", "date": "Jul 05, 2026"}, "mc_t_002": {"title": "Draft eSpeakers calendar entry for the UN Sept 21-22 lead", "status_label": "In progress", "workstream": "Speaking", "description": "New real lead for the UN engagement on Sept 21-22. Needs a calendar entry drafted so it can be pasted into eSpeakers.", "goal": "Calendar entry drafted and ready to paste into eSpeakers", "date": "Jul 06, 2026"}, "mc_t_003": {"title": "Repurpose 3 unpublished website articles into newsletter drafts", "status_label": "In progress", "workstream": "Newsletter", "description": "Pull from the 40+ unpublished website articles and adapt 3 into newsletter-ready drafts matching Gregory's voice.", "goal": "3 newsletter drafts saved for review, matching Gregory voice", "date": "Jul 05, 2026"}, "mc_t_007": {"title": "Add 4 video candidates to the eSpeakers profile", "status_label": "In progress", "workstream": "Speaking", "description": "4 unused video candidates were found on Gregory's YouTube channel; embed them on the eSpeakers profile.", "goal": "4 videos embedded on the profile", "date": "Jul 06, 2026"}, "tr_t3": {"title": "Greg unblocks access", "status_label": "Waiting on you", "workstream": "Setup", "description": "", "goal": "", "date": "Jun 24, 2026"}, "tr_t30": {"title": "Get Greg's travel calendar", "status_label": "Waiting on you", "workstream": "Ops", "description": "Greg will send his travel calendar; use it to schedule events and asks around his availability.", "goal": "", "date": "Jun 25, 2026"}, "mc_t_011": {"title": "Get Greg's decision on paid-speaking HOLDs", "status_label": "Waiting on you", "workstream": "Speaking", "description": "TIGER 21 and TEC Canada are on hold pending Greg's confirmation of compensation terms before submitting or calling the organizer.", "goal": "Both leads moved to submitted or declined based on Greg's call", "date": "Jul 05, 2026"}, "mc_t_013": {"title": "Confirm 4th WeFunder company name for the website", "status_label": "Waiting on you", "workstream": "Website", "description": "The ventures-investments page is incomplete pending Greg naming the fourth active WeFunder-backed company.", "goal": "ventures-investments.html lists four confirmed company names with no placeholder", "date": "Jul 05, 2026"}, "mc_t_014": {"title": "Resolve Book 101 Review scheduling question", "status_label": "Waiting on you", "workstream": "Outreach", "description": "Podcast guest invite needs Greg's input on whether it is the same show as the April 15 recording; a scheduling reply is still open.", "goal": "Book 101 Review is scheduled on the calendar or explicitly declined", "date": "Jul 05, 2026"}, "mc_t_028": {"title": "Resolve Jul 14 Speaker Initial Call vs travel conflict", "status_label": "Waiting on you", "workstream": "Speaking", "description": "Laptop Lifestyle booked Greg for a Speaker Initial Call Tue Jul 14 8 AM PT, but Greg is away Jul 7-14. Confirm whether he can take it or it must move.", "goal": "Call either confirmed as workable or rescheduled with the organizer", "date": "Jul 05, 2026"}, "tr_t27": {"title": "Stand up the master calendar", "status_label": "Recently completed", "workstream": "Systems", "description": "Every event + its promo countdown, plus the per-channel publishing calendar (Operational Plan, Days 1-14).", "goal": "", "date": "Jun 30, 2026"}, "tr_t31": {"title": "Put Greg's brand kit in the Drive", "status_label": "Recently completed", "workstream": "Brand", "description": "Add Greg brand kit (colours, fonts, logo, assets) to the shared Drive so everything pulls from one source.", "goal": "", "date": "Jun 27, 2026"}, "tr_t2": {"title": "Confirm ticket pricing", "status_label": "Recently completed", "workstream": "Launch", "description": "Resolve tiered ($395.99/495.99/595.99) vs flat $495.99", "goal": "", "date": "Jun 24, 2026"}, "tr_t32": {"title": "Set up recurring meetings (Mon + Fri)", "status_label": "Recently completed", "workstream": "Ops", "description": "Create the recurring 'Gregory & Rheanne alignment' meeting Mon 8:00-8:30 (Greg's time) and a Fri 8:00 check-in, same format.", "goal": "", "date": "Jun 23, 2026"}, "tr_t22": {"title": "Review the Master Manual", "status_label": "Recently completed", "workstream": "Program", "description": "Read Greg's Master Manual end to end (To-Do List #1).", "goal": "", "date": "Jul 04, 2026"}, "tr_t34": {"title": "Optimize the E-speakers profile", "status_label": "Recently completed", "workstream": "Growth", "description": "DONE Jul 6. Speaker profile score raised from 88 to 90 out of 100. Video library grown from 3 to 7 real clips, calendar refreshed with travel and UN holds, and pending review verifications resent. Last step to a perfect score is more client reviews, request emails are drafted and awaiting approval.", "goal": "", "date": "Jul 11, 2026"}, "mc_t_004": {"title": "Follow up Doug Means meetup co-host outreach", "status_label": "Recently completed", "workstream": "Outreach", "description": "Doug Means (5,644 members) is still an open co-host lead. Send a follow-up and log any reply.", "goal": "Follow-up message sent and reply logged", "date": "Jul 06, 2026"}, "mc_t_016": {"title": "Find EO Louisiana direct chapter contact email", "status_label": "Recently completed", "workstream": "Speaking", "description": "Outreach research flagged EO Louisiana as missing a direct contact method before a speaking submission can go out.", "goal": "A verified direct contact email for EO Louisiana exists in the tracker", "date": "Jul 06, 2026"}}</script>
+
+<dialog id="task-detail">
+  <div class="td-wrap">
+    <button type="button" class="td-close" id="td-close" aria-label="Close">&times;</button>
+    <div class="td-header">
+      <span class="td-status" id="td-status"></span>
+      <span class="td-workstream" id="td-workstream"></span>
+    </div>
+    <h3 class="td-title" id="td-title"></h3>
+    <div class="td-section" id="td-desc-section">
+      <div class="td-desc" id="td-desc"></div>
+    </div>
+    <div class="td-section" id="td-goal-section">
+      <div class="td-goal"><span class="td-goal-label">Done when:</span> <span id="td-goal-text"></span></div>
+    </div>
+    <div class="td-date" id="td-date"></div>
+    <div class="td-footer">
+      <button type="button" class="btn-cmd" id="td-close-btn">Close</button>
+    </div>
+  </div>
+</dialog>
+
+
 <script>
 // ---- View router: hash-based nav (sidebar + top bar persist; only the
 // center region swaps). Default view is #overview. No-JS fallback: the CSS
 // only hides non-active [data-view] sections once <html> has the .js-ready
 // class, which this script adds -- if JS never runs, every view just
 // renders stacked. This is the only script on the page: pure client-side
-// hash routing, no fetch, no POST, no external requests.
+// hash routing plus the read-only task-detail dialog below -- no fetch, no
+// POST, no external requests, no /api anything.
 (function() {
   var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'roadmap'];
 
@@ -529,6 +610,74 @@ h2.view-title{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:
   document.documentElement.classList.add('js-ready');
   window.addEventListener('hashchange', function() { showView(currentView()); });
   showView(currentView());
+
+  // ---- Read-only task detail dialog: click any task card to see its full
+  // detail, read from the sanitized #task-data JSON payload embedded above.
+  // No fetch, no server round-trip -- everything needed is already in the
+  // page. The dialog has exactly one control: Close.
+  var taskDataEl = document.getElementById('task-data');
+  var TASK_DATA = {};
+  if (taskDataEl) {
+    try { TASK_DATA = JSON.parse(taskDataEl.textContent || '{}'); } catch (e) { TASK_DATA = {}; }
+  }
+
+  var tdDialog = document.getElementById('task-detail');
+  var tdStatus = document.getElementById('td-status');
+  var tdWorkstream = document.getElementById('td-workstream');
+  var tdTitle = document.getElementById('td-title');
+  var tdDescSection = document.getElementById('td-desc-section');
+  var tdDesc = document.getElementById('td-desc');
+  var tdGoalSection = document.getElementById('td-goal-section');
+  var tdGoalText = document.getElementById('td-goal-text');
+  var tdDate = document.getElementById('td-date');
+
+  function openTaskDetail(taskId) {
+    var t = TASK_DATA[taskId];
+    if (!t || !tdDialog) return;
+
+    if (tdStatus) tdStatus.textContent = t.status_label || '';
+    if (tdWorkstream) {
+      tdWorkstream.textContent = t.workstream || '';
+      tdWorkstream.style.display = t.workstream ? '' : 'none';
+    }
+    if (tdTitle) tdTitle.textContent = t.title || '';
+
+    if (tdDesc) tdDesc.textContent = t.description || '';
+    if (tdDescSection) tdDescSection.style.display = t.description ? '' : 'none';
+
+    if (tdGoalText) tdGoalText.textContent = t.goal || '';
+    if (tdGoalSection) tdGoalSection.style.display = t.goal ? '' : 'none';
+
+    if (tdDate) tdDate.textContent = t.date || '';
+
+    if (typeof tdDialog.showModal === 'function') {
+      tdDialog.showModal();
+    }
+  }
+
+  document.querySelectorAll('[data-task-detail]').forEach(function(card) {
+    card.addEventListener('click', function() {
+      openTaskDetail(card.getAttribute('data-task-detail'));
+    });
+    card.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openTaskDetail(card.getAttribute('data-task-detail'));
+      }
+    });
+  });
+
+  if (tdDialog) {
+    var tdClose = document.getElementById('td-close');
+    var tdCloseBtn = document.getElementById('td-close-btn');
+    [tdClose, tdCloseBtn].forEach(function(btn) {
+      if (btn) btn.addEventListener('click', function() { tdDialog.close(); });
+    });
+    // Click on the backdrop (outside .td-wrap) also closes it.
+    tdDialog.addEventListener('click', function(ev) {
+      if (ev.target === tdDialog) tdDialog.close();
+    });
+  }
 })();
 </script>
 </body></html>

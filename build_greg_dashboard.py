@@ -317,6 +317,7 @@ def load_mc_tasks():
             "id": clean(t.get("id", "")),
             "title": title,
             "description": desc,
+            "goal": clean(t.get("goal", "")),
             "workstream": display_workstream(ws_raw),
             "status": status,
             "updated": clean(t.get("updated", "")),
@@ -470,6 +471,16 @@ MC_STATUS_BUCKET = {
     "done": "done",
 }
 
+# Plain-language status label per board bucket -- shown as the detail
+# dialog's status chip. Deliberately just 3 values, matching the 3 board
+# columns Greg already sees (no raw internal status words like "assigned",
+# "review", "ongoing" ever reach this page).
+BUCKET_STATUS_LABEL = {
+    "in_progress": "In progress",
+    "waiting": "Waiting on you",
+    "done": "Recently completed",
+}
+
 
 def _task_note_line(t):
     """A clean, client-safe one-line note if there's something worth showing."""
@@ -501,9 +512,13 @@ def _normalize_tracker_card(t):
         bucket = "done"
     else:
         return None
+    desc = clean_client_text(safe(clean(t.get("Description", ""))))
+    date = t.get("Updated", "") or t.get("Due", "")
     return {
+        "id": "tr_" + slug(clean(t.get("ID", "")) or title),
         "title": title, "workstream": ws, "note": note, "bucket": bucket,
-        "updated": t.get("Updated", "") or t.get("Due", ""),
+        "description": desc, "goal": "", "date": clean(date),
+        "updated": date,
     }
 
 
@@ -523,12 +538,33 @@ def _normalize_mc_card(t):
         if not bucket:
             return None
     return {
+        "id": "mc_" + slug(clean(t.get("id", "")) or t.get("title", "")),
         "title": t.get("title", ""),
         "workstream": t.get("workstream", "Other"),
         "note": t.get("description", ""),
         "bucket": bucket,
+        "description": t.get("description", ""),
+        "goal": scrub_agent_names(clean_client_text(safe(clean(t.get("goal", ""))))),
+        "date": clean(t.get("updated", "")),
         "updated": t.get("updated", ""),
     }
+
+
+def _display_date(date_str):
+    """Best-effort friendly date for the detail dialog -- tolerates a bare
+    ISO date, a full ISO timestamp, or the tracker's free-text Due format.
+    Falls back to the raw string (already sanitized) if unparsable."""
+    s = (date_str or "").strip()
+    if not s:
+        return ""
+    dt = _parse_dt(s)
+    if dt:
+        d = dt.date() if hasattr(dt, "date") else dt
+        return d.strftime("%b %d, %Y")
+    d = parse_due(s)
+    if d:
+        return d.strftime("%b %d, %Y")
+    return s
 
 
 def build_board_card(card):
@@ -536,11 +572,13 @@ def build_board_card(card):
     ws = esc(card["workstream"])
     note = card.get("note", "")
     note_html = f'<div class="task-desc">{esc(note)}</div>' if note else ""
+    cid = esc(card["id"])
     return f"""
-<div class="taskcard">
+<div class="taskcard" data-task-detail="{cid}" tabindex="0" role="button">
   <div class="task-title-row"><div class="task-title">{title}</div></div>
   <div class="tag-row"><span class="tag">{ws}</span></div>
   {note_html}
+  <div class="task-details-hint">details &rsaquo;</div>
 </div>
 """
 
@@ -557,6 +595,7 @@ def build_board(tasks, mc_tasks=None):
 
     counts = {}
     columns_html = ""
+    task_payload = {}
     for key, label, color, _statuses in BOARD_COLUMNS:
         col_cards = [c for c in cards if c["bucket"] == key]
         if key == "done":
@@ -565,6 +604,15 @@ def build_board(tasks, mc_tasks=None):
         total_n = len(col_cards)
         counts[key] = total_n
         shown = col_cards[:COLUMN_CAP]
+        for c in shown:
+            task_payload[c["id"]] = {
+                "title": c["title"],
+                "status_label": BUCKET_STATUS_LABEL.get(c["bucket"], ""),
+                "workstream": c["workstream"],
+                "description": c.get("description", "") or c.get("note", ""),
+                "goal": c.get("goal", ""),
+                "date": _display_date(c.get("date", "")),
+            }
         cards_html = "".join(build_board_card(c) for c in shown) or '<p class="col-empty">Nothing here right now.</p>'
         more_html = ""
         remaining = total_n - len(shown)
@@ -580,7 +628,51 @@ def build_board(tasks, mc_tasks=None):
       <div class="col-body">{cards_html}{more_html}</div>
     </div>
 """
-    return f'<div class="board">{columns_html}</div>', counts
+    return f'<div class="board">{columns_html}</div>', counts, task_payload
+
+
+def build_task_data_json(task_payload):
+    """Sanitized JSON payload of every task card rendered on the board --
+    embedded as <script type="application/json"> and read client-side to
+    populate the read-only detail dialog. Every string field has already
+    passed through safe()/clean_client_text()/scrub_agent_names() upstream in
+    build_board(); tasks excluded from the board (sensitive, wrong
+    workstream, over the column cap) are never added to task_payload, so they
+    stay excluded from this payload too."""
+    return (
+        '<script type="application/json" id="task-data">'
+        + json.dumps(task_payload, ensure_ascii=False).replace("</", "<\\/")
+        + "</script>"
+    )
+
+
+def build_task_detail_dialog():
+    """One shared, READ-ONLY <dialog> for task detail -- title, status chip,
+    workstream, description, "Done when", date, and a single Close button.
+    No other buttons, no links out. Populated client-side from #task-data;
+    this dialog never talks to a server and has no action affordances."""
+    return """
+<dialog id="task-detail">
+  <div class="td-wrap">
+    <button type="button" class="td-close" id="td-close" aria-label="Close">&times;</button>
+    <div class="td-header">
+      <span class="td-status" id="td-status"></span>
+      <span class="td-workstream" id="td-workstream"></span>
+    </div>
+    <h3 class="td-title" id="td-title"></h3>
+    <div class="td-section" id="td-desc-section">
+      <div class="td-desc" id="td-desc"></div>
+    </div>
+    <div class="td-section" id="td-goal-section">
+      <div class="td-goal"><span class="td-goal-label">Done when:</span> <span id="td-goal-text"></span></div>
+    </div>
+    <div class="td-date" id="td-date"></div>
+    <div class="td-footer">
+      <button type="button" class="btn-cmd" id="td-close-btn">Close</button>
+    </div>
+  </div>
+</dialog>
+"""
 
 
 # ---------------- CALENDAR ----------------
@@ -638,6 +730,9 @@ def load_calendar_events():
     return out, True
 
 
+RECENT_DAYS = 7
+
+
 def upcoming_calendar_events(today=None):
     """Sorted upcoming/TBD public events -- shared by the sidebar mini-list
     and the full Calendar view."""
@@ -655,6 +750,41 @@ def upcoming_calendar_events(today=None):
     return upcoming
 
 
+def recent_calendar_events(today=None):
+    """Public events that already passed, but within the trailing RECENT_DAYS
+    window -- so the Upcoming list doesn't look empty right after an event
+    happens. An event with an end date counts as "recent" until RECENT_DAYS
+    after its end. Sorted most-recent-first."""
+    today = today or datetime.date.today()
+    events, _ = load_calendar_events()
+    window_start = today - datetime.timedelta(days=RECENT_DAYS)
+
+    recent = []
+    for e in events:
+        if e.get("tbd"):
+            continue
+        d = e.get("date")
+        if not d:
+            continue
+        last_day = e.get("end") or d
+        if last_day < today and last_day >= window_start:
+            recent.append(e)
+    recent.sort(key=lambda e: e.get("date") or datetime.date.min, reverse=True)
+    return recent
+
+
+PROVISIONAL_SUFFIX_RE = re.compile(r"\s*\(provisional\)\s*$", re.IGNORECASE)
+
+
+def _split_provisional(title):
+    """Split a trailing "(provisional)" suffix off a title so it can be
+    rendered as a small amber pill instead of raw parenthetical text."""
+    m = PROVISIONAL_SUFFIX_RE.search(title or "")
+    if not m:
+        return title, False
+    return title[:m.start()].rstrip(), True
+
+
 def build_sidebar_key_dates(today=None):
     """Compact mini-list of the next 3 upcoming public events, for the sidebar."""
     upcoming = upcoming_calendar_events(today)[:3]
@@ -668,10 +798,12 @@ def build_sidebar_key_dates(today=None):
             badge = "TBD"
         else:
             badge = d.strftime("%b %d")
+        title, is_provisional = _split_provisional(e.get("title", ""))
+        pill_html = ' <span class="kd-pill">provisional</span>' if is_provisional else ""
         rows += (
             f'<div class="kd-row">'
             f'<span class="kd-badge">{esc(badge)}</span>'
-            f'<span class="kd-title">{esc(e.get("title", ""))}</span>'
+            f'<span class="kd-title">{esc(title)}{pill_html}</span>'
             f'</div>')
 
     return f"""
@@ -842,8 +974,7 @@ def build_calendar(today=None):
         else:
             m += 1
 
-    rows = ""
-    for e in upcoming:
+    def _cal_row(e):
         d = e.get("date")
         end_d = e.get("end")
         if e.get("tbd") or not d:
@@ -853,14 +984,26 @@ def build_calendar(today=None):
         else:
             badge = f'<div class="cal-badge">{d.strftime("%b %d")}</div>'
         where_html = f'<div class="cal-where muted">{esc(e.get("where", ""))}</div>' if e.get("where") else ""
-        rows += (
+        title, is_provisional = _split_provisional(e.get("title", ""))
+        pill_html = ' <span class="cal-pill">provisional</span>' if is_provisional else ""
+        return (
             f'<div class="cal-row">'
             f'{badge}'
-            f'<div class="cal-info"><div class="cal-title">{esc(e.get("title", ""))}</div>{where_html}</div>'
+            f'<div class="cal-info"><div class="cal-title">{esc(title)}{pill_html}</div>{where_html}</div>'
             f'</div>')
 
+    rows = "".join(_cal_row(e) for e in upcoming)
     if not rows:
         rows = '<p class="col-empty">Nothing scheduled right now.</p>'
+
+    recent = recent_calendar_events(today)
+    recent_html = ""
+    if recent:
+        recent_rows = "".join(_cal_row(e) for e in recent)
+        recent_html = f"""
+    <div class="cal-recent-head">Recent</div>
+    <div class="cal-upcoming-list cal-recent-list">{recent_rows}</div>
+"""
 
     return f"""
 <div class="cal-body">
@@ -868,6 +1011,7 @@ def build_calendar(today=None):
   <div class="cal-upcoming">
     <div class="cal-upcoming-head">Upcoming</div>
     <div class="cal-upcoming-list">{rows}</div>
+    {recent_html}
   </div>
 </div>
 """
@@ -1085,12 +1229,42 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 .col-empty{{padding:6px 4px;font-size:11.5px;color:var(--muted);}}
 .col-more{{padding:2px 4px;font-size:11px;}}
 
-.taskcard{{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;}}
+.taskcard{{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 13px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}}
+.taskcard:hover{{border-color:var(--blue);box-shadow:0 2px 8px rgba(26,140,240,.12);}}
+.taskcard:hover .task-details-hint{{opacity:1;}}
+.taskcard:focus-visible{{outline:2px solid var(--blue);outline-offset:1px;}}
 .task-title-row{{margin-bottom:6px;}}
 .task-title{{font-weight:700;font-size:13.5px;line-height:1.3;color:var(--navy);}}
 .task-desc{{font-size:12px;color:#5b606b;line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}}
 .tag-row{{display:flex;flex-wrap:wrap;gap:5px;}}
 .tag{{background:#f3f2ee;color:#5b606b;font-size:10px;border-radius:5px;padding:2px 7px;}}
+.task-details-hint{{font-size:10.5px;font-weight:700;color:var(--blue);margin-top:8px;opacity:0;transition:opacity .15s;}}
+
+/* Task detail dialog -- read-only: title, status, workstream, description,
+   "Done when", date, single Close button. No other actions. */
+#task-detail{{border:none;border-radius:14px;padding:0;max-width:520px;width:92vw;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);}}
+#task-detail::backdrop{{background:rgba(20,20,20,.45);}}
+.td-wrap{{padding:22px 24px 20px;overflow-y:auto;max-height:85vh;position:relative;}}
+.td-close{{position:absolute;top:14px;right:16px;border:none;background:transparent;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px;}}
+.td-close:hover{{color:var(--text);}}
+.td-header{{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding-right:28px;}}
+.td-status{{font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--blue);background:var(--blue-bg);border-radius:4px;padding:3px 8px;}}
+.td-workstream{{font-size:9.5px;font-weight:700;color:#5b606b;background:#f3f2ee;border-radius:4px;padding:3px 8px;}}
+.td-title{{font-size:18px;font-weight:800;margin:0 0 12px;line-height:1.3;color:var(--navy);}}
+.td-section{{margin-bottom:14px;}}
+.td-desc{{font-size:13.5px;color:#3a3f4a;line-height:1.5;}}
+.td-goal{{font-size:13px;color:#3a3f4a;line-height:1.5;font-style:italic;}}
+.td-goal-label{{font-weight:700;font-style:normal;color:var(--navy);}}
+.td-date{{font-size:11.5px;color:var(--muted);margin-bottom:6px;}}
+.td-footer{{display:flex;margin-top:6px;padding-top:14px;border-top:1px solid var(--border);}}
+.td-footer .btn-cmd{{margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;}}
+.td-footer .btn-cmd:hover{{background:#1678d4;}}
+
+@media (max-width:767px){{
+  #task-detail{{max-width:none;width:100vw;height:100dvh;max-height:100dvh;margin:0;top:0;left:0;border-radius:0;}}
+  .td-wrap{{max-height:100dvh;height:100%;padding:18px 16px calc(16px + env(safe-area-inset-bottom));}}
+  .td-footer .btn-cmd{{width:100%;min-height:44px;}}
+}}
 
 /* Scoreboard */
 .scoregrid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}}
@@ -1121,6 +1295,9 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 .cal-badge-tbd{{background:#f3f2ee;color:var(--muted);}}
 .cal-title{{font-weight:700;font-size:13px;color:var(--navy);}}
 .cal-where{{font-size:12px;margin-top:2px;}}
+.cal-pill,.kd-pill{{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:999px;padding:2px 7px;vertical-align:middle;}}
+.cal-recent-head{{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:18px 0 12px;padding-top:14px;border-top:1px solid var(--border);}}
+.cal-recent-list{{opacity:.75;}}
 
 /* Maps / roadmap */
 .maps{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}}
@@ -1231,13 +1408,17 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
 
 <div class="foot">Prepared and kept current by your Chief of Staff department.</div>
 
+{TASK_DATA_JSON}
+{TASK_DETAIL_DIALOG}
+
 <script>
 // ---- View router: hash-based nav (sidebar + top bar persist; only the
 // center region swaps). Default view is #overview. No-JS fallback: the CSS
 // only hides non-active [data-view] sections once <html> has the .js-ready
 // class, which this script adds -- if JS never runs, every view just
 // renders stacked. This is the only script on the page: pure client-side
-// hash routing, no fetch, no POST, no external requests.
+// hash routing plus the read-only task-detail dialog below -- no fetch, no
+// POST, no external requests, no /api anything.
 (function() {{
   var VALID_VIEWS = ['overview', 'calendar', 'scoreboard', 'roadmap'];
 
@@ -1258,6 +1439,74 @@ h2.view-title{{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform
   document.documentElement.classList.add('js-ready');
   window.addEventListener('hashchange', function() {{ showView(currentView()); }});
   showView(currentView());
+
+  // ---- Read-only task detail dialog: click any task card to see its full
+  // detail, read from the sanitized #task-data JSON payload embedded above.
+  // No fetch, no server round-trip -- everything needed is already in the
+  // page. The dialog has exactly one control: Close.
+  var taskDataEl = document.getElementById('task-data');
+  var TASK_DATA = {{}};
+  if (taskDataEl) {{
+    try {{ TASK_DATA = JSON.parse(taskDataEl.textContent || '{{}}'); }} catch (e) {{ TASK_DATA = {{}}; }}
+  }}
+
+  var tdDialog = document.getElementById('task-detail');
+  var tdStatus = document.getElementById('td-status');
+  var tdWorkstream = document.getElementById('td-workstream');
+  var tdTitle = document.getElementById('td-title');
+  var tdDescSection = document.getElementById('td-desc-section');
+  var tdDesc = document.getElementById('td-desc');
+  var tdGoalSection = document.getElementById('td-goal-section');
+  var tdGoalText = document.getElementById('td-goal-text');
+  var tdDate = document.getElementById('td-date');
+
+  function openTaskDetail(taskId) {{
+    var t = TASK_DATA[taskId];
+    if (!t || !tdDialog) return;
+
+    if (tdStatus) tdStatus.textContent = t.status_label || '';
+    if (tdWorkstream) {{
+      tdWorkstream.textContent = t.workstream || '';
+      tdWorkstream.style.display = t.workstream ? '' : 'none';
+    }}
+    if (tdTitle) tdTitle.textContent = t.title || '';
+
+    if (tdDesc) tdDesc.textContent = t.description || '';
+    if (tdDescSection) tdDescSection.style.display = t.description ? '' : 'none';
+
+    if (tdGoalText) tdGoalText.textContent = t.goal || '';
+    if (tdGoalSection) tdGoalSection.style.display = t.goal ? '' : 'none';
+
+    if (tdDate) tdDate.textContent = t.date || '';
+
+    if (typeof tdDialog.showModal === 'function') {{
+      tdDialog.showModal();
+    }}
+  }}
+
+  document.querySelectorAll('[data-task-detail]').forEach(function(card) {{
+    card.addEventListener('click', function() {{
+      openTaskDetail(card.getAttribute('data-task-detail'));
+    }});
+    card.addEventListener('keydown', function(ev) {{
+      if (ev.key === 'Enter' || ev.key === ' ') {{
+        ev.preventDefault();
+        openTaskDetail(card.getAttribute('data-task-detail'));
+      }}
+    }});
+  }});
+
+  if (tdDialog) {{
+    var tdClose = document.getElementById('td-close');
+    var tdCloseBtn = document.getElementById('td-close-btn');
+    [tdClose, tdCloseBtn].forEach(function(btn) {{
+      if (btn) btn.addEventListener('click', function() {{ tdDialog.close(); }});
+    }});
+    // Click on the backdrop (outside .td-wrap) also closes it.
+    tdDialog.addEventListener('click', function(ev) {{
+      if (ev.target === tdDialog) tdDialog.close();
+    }});
+  }}
 }})();
 </script>
 </body></html>
@@ -1277,7 +1526,9 @@ def render():
 
     needs_you_html = build_needs_you(tasks)
     this_week_html = build_this_week(mc_tasks)
-    board_html, board_counts = build_board(tasks, mc_tasks)
+    board_html, board_counts, task_payload = build_board(tasks, mc_tasks)
+    task_data_json_html = build_task_data_json(task_payload)
+    task_detail_dialog_html = build_task_detail_dialog()
     calendar_html = build_calendar()
     scoreboard_html = build_scoreboard(s)
     maps_html = build_maps()
@@ -1307,6 +1558,8 @@ def render():
         THIS_WEEK=this_week_html,
         NEEDS_YOU=needs_you_html,
         BOARD=board_html,
+        TASK_DATA_JSON=task_data_json_html,
+        TASK_DETAIL_DIALOG=task_detail_dialog_html,
         CALENDAR=calendar_html,
         SCOREBOARD=scoreboard_html,
         MAPS=maps_html,
